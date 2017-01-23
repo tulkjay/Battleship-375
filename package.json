@@ -1,0 +1,34 @@
+{
+  "name": "battleship-api-375",
+  "version": "1.0.0",
+  "description": "This program is meant to provide the backend for a battleship game",
+  "main": "index.js",
+  "watch": {
+    "base": {
+      "patterns": [
+        "src"
+      ],
+      "extensions": "js, html",
+      "quiet": true
+    }
+  },
+  "scripts": {
+    "start": "npm run watch",
+    "base": "node src/index.js", 
+    "watch": "npm-watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tulkjay/Battleship-375.git"
+  },
+  "author": "Jay Tulk",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tulkjay/Battleship-375/issues"
+  },
+  "homepage": "https://github.com/tulkjay/Battleship-375#readme",
+  "dependencies": {
+    "express": "^4.14.0",
+    "npm-watch": "^0.1.7"
+  }
+}
