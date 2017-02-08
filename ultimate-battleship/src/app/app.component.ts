@@ -1,20 +1,36 @@
-import { Component } from '@angular/core';
-export class Hero {
-  id: number;
-  name: string;
+import { Component} from '@angular/core';
+
+export class Square {
+  selected: boolean;
+  x: number;
+  y: number;
+  constructor(x: number, y: number) {
+    this.selected = false;
+    this.x = x;
+    this.y = y;
+  }
 }
-const HEROES: Hero[] = [
-  { id: 11, name: 'Mr. Nice' },
-  { id: 12, name: 'Narco' },
-  { id: 13, name: 'Bombasto' },
-  { id: 14, name: 'Celeritas' },
-  { id: 15, name: 'Magneta' },
-  { id: 16, name: 'RubberMan' },
-  { id: 17, name: 'Dynama' },
-  { id: 18, name: 'Dr IQ' },
-  { id: 19, name: 'Magma' },
-  { id: 20, name: 'Tornado' }
-];
+
+export class Row {
+  squares: Array<Square>;
+  constructor(x: number) {
+    this.squares = new Array(10);
+    for (let y = 0; y < 10; y++) {
+      this.squares[y] = new Square(x, y);
+    }
+  }
+}
+
+export class Grid {
+  rows: Array<Row>;
+  constructor() {
+    this.rows = new Array(10);
+    for (let i = 0; i < 10; i++) {
+      this.rows[i] = new Row(i);
+    }
+  }
+}
+
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -22,10 +38,18 @@ const HEROES: Hero[] = [
 })
 
 export class AppComponent {
-  selectedHero: Hero;
   title = 'Ultimate Battleship';
-  heroes = HEROES;
-  onSelect(hero: Hero): void {
-    this.selectedHero = hero;
+  shotCount: number;
+  grid: Grid;
+
+  constructor() {
+    this.grid = new Grid();
+    this.shotCount = 0;
+  }
+
+  fire(square: Square): void {
+    if (square.selected) return;
+    square.selected = true;
+    this.shotCount++;
   }
 }

@@ -1,17 +1,15 @@
-    <h1>{{title}}</h1>
-    <h2>My Heroes</h2>
-    <ul class="heroes">
-      <li *ngFor="let hero of heroes"
-        [class.selected]="hero === selectedHero"
-        (click)="onSelect(hero)">
-        <span class="badge">{{hero.id}}</span> {{hero.name}}
-      </li>
-    </ul>
-    <div *ngIf="selectedHero">
-      <h2>{{selectedHero.name}} details!</h2>
-      <div><label>id: </label>{{selectedHero.id}}</div>
-      <div>
-        <label>name: </label>
-        <input [(ngModel)]="selectedHero.name" placeholder="name"/>
-      </div>
+<h1 align="center">{{title}}</h1>
+<h2 align="center"><label>Shots fired: {{shotCount}}</label></h2>
+<div class="container-fluid">
+<div class="center">
+  <div class="row" *ngFor="let row of grid.rows">
+    <div class="col-md-1 square" 
+      [style.background-color]="square.selected ? 'red' : 'cornflowerblue'" 
+      *ngFor="let square of row.squares"
+      (click)="fire(square)">
+      {{square.selected ? 'Miss' : ''}}
+      <span *ngIf="square.selected">X</span>
     </div>
+  </div>
+  </div>
+</div>
