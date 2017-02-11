@@ -1,6 +1,4 @@
-import { Component} from '@angular/core';
-
-export class Square {
+class Square {
   selected: boolean;
   x: number;
   y: number;
@@ -11,7 +9,7 @@ export class Square {
   }
 }
 
-export class Row {
+class Row {
   squares: Array<Square>;
   constructor(x: number) {
     this.squares = new Array(10);
@@ -29,27 +27,10 @@ export class Grid {
       this.rows[i] = new Row(i);
     }
   }
-}
 
-@Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
-})
-
-export class AppComponent {
-  title = 'Ultimate Battleship';
-  shotCount: number;
-  grid: Grid;
-
-  constructor() {
-    this.grid = new Grid();
-    this.shotCount = 0;
-  }
-
-  fire(square: Square): void {
-    if (square.selected) return;
+  fire(square: Square, shotCount: number): number {
+    if (square.selected) return shotCount;
     square.selected = true;
-    this.shotCount++;
+    return shotCount++;
   }
 }

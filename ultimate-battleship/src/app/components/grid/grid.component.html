@@ -1,0 +1,10 @@
+<div class="container">
+  <div class="row" *ngFor="let row of rows">
+    <div class="square"
+         [style.background-color]="square.selected ? 'red' : 'cornflowerblue'"
+         *ngFor="let square of row.squares"
+         (click)="fire(square)">      
+      <span *ngIf="square.selected">MISSSSSS</span>
+    </div>
+  </div>
+</div>

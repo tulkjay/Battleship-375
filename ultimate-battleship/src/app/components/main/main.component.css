@@ -1,0 +1,10 @@
+.center {
+  margin: auto;
+  max-width: 50%;
+}
+
+.selected {
+  background-color: #CFD8DC !important;
+  border: 2px solid white;
+  color: white;
+}
