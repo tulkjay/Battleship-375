@@ -13,7 +13,18 @@ io.on('connection', socket => {
   console.log("New connection, id: ", socket.id)  
   socket.on('add-player', () => {   
     let connectionResult = placePlayer(socket.id);
-    socket.emit('connection-result', connectionResult);  
+    if(connectionResult.gameReady) {
+      console.log("session: ", session);
+      let playerOneId = session.filter(id => id !== socket.id);    
+      let playerOneUpdate = {
+        gameReady: connectionResult.gameReady, 
+        message: `Starting game, playing against ${socket.id}`
+      }
+      
+      io.to(playerOneId).emit('connection-result', playerOneUpdate);            
+    }    
+    
+    socket.emit('connection-result', connectionResult);          
   })  
 
   socket.on('shot-fired', location => {
@@ -21,13 +32,11 @@ io.on('connection', socket => {
     //Convert to character or do whatever to let the leds know what to do.
 
     let recipientId = session.filter(id => id !== socket.id);
-    
     io.to(recipientId).emit('shot-received', location);
   })
   
   //This is fire on window close/refresh(client side)
   socket.on('disconnect', () => {
-    console.log("disconnect")
       session = session.filter(ids => ids !== socket.id);
   });
 })
@@ -47,3 +56,4 @@ server.listen(port, (err) => {
   }
   console.log(`Server is listening on ${port}`)
 })
+
