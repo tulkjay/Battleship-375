@@ -16,7 +16,7 @@ export class MainComponent implements OnInit {
   ngOnInit(): void {}
 
   onKey(event: any){
-    console.log("Key pressed: ", event.target.value);
+    console.log("Key pressed: ", event.key.replace("Arrow", ""));
   }
 
 }

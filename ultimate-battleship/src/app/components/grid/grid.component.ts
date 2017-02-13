@@ -10,26 +10,29 @@ import { SocketService } from'../../services/socket.service';
 export class GridComponent {
   rows: Array<Row>;  
   socket: SocketIOClient.Socket;
+  turn: boolean;
 
   constructor(private socketService: SocketService) {    
     this.socket = this.socketService.getConnection();
     this.rows = new Array(10);
-    
+        
     for (let i = 0; i < 10; i++) {
       this.rows[i] = new Row(i);
     }
     
-    this.socket.on('shot-received', location => console.log('Shot received:', location));
+    this.socket.on('shot-received', location => {
+      this.socketService.changeTurn();
+      console.log('Shot received:', location)
+    });
   }  
 
-  onKey(event) {
-    console.log("Key presses")
-  }
-
   fire(square: Square, shotCount: number): number {
-    if (square.selected) return shotCount;
+    if (square.selected || !this.socketService.isTurn()) return shotCount;    
+
     square.selected = true;
     this.socket.emit('shot-fired', square);
+    this.socketService.changeTurn();
+
     return shotCount++;
   }
 }

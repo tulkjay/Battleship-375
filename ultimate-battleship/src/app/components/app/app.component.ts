@@ -13,5 +13,4 @@ import * as io from 'socket.io-client';
 
 export class AppComponent{
   //This component will handle 'logging in' and routing.
-
 }

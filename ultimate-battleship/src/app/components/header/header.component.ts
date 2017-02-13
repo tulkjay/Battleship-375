@@ -30,7 +30,8 @@ export class HeaderComponent implements OnInit {
 
       this.socket.on('connection-result', response => {
         this.title = response.message;
-        
+        if(response.isTurn) this.socketService.setTurn(response.isTurn);
+
         setTimeout(() => {
           this.title = "Ultimate Battleship";
         }, 3000);
