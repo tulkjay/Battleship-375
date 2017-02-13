@@ -6,18 +6,40 @@ const io = require('socket.io')(server);
 const port = 3000;
 
 app.use(express.static(path.join(__dirname, 'server')));
+let session = [];
 
-app.get('/', (request, response) => {  
-  response.send("Successful request")
-})
+//Socket IO pub/sub definitions
+io.on('connection', socket => {    
+  console.log("New connection, id: ", socket.id)  
+  socket.on('add-player', () => {   
+    let connectionResult = placePlayer(socket.id);
+    socket.emit('connection-result', connectionResult);  
+  })  
 
-io.on('connection', socket => {  
-  console.log("New connection detected")
-  socket.on('emit-changes', () => {
-    console.log("Connecting!")
+  socket.on('shot-fired', location => {
+    
+    //Convert to character or do whatever to let the leds know what to do.
+
+    let recipientId = session.filter(id => id !== socket.id);
+    
+    io.to(recipientId).emit('shot-received', location);
   })
-  socket.emit('connect', {message: 'Greetings'});
+  
+  //This is fire on window close/refresh(client side)
+  socket.on('disconnect', () => {
+    console.log("disconnect")
+      session = session.filter(ids => ids !== socket.id);
+  });
 })
+
+function placePlayer(id) {  
+  if(!session.length) {
+    session[0] = id;
+    return { gameReady:false, message: 'Waiting for other player...'};
+  }
+  session[1] = id;  
+  return { gameReady:true, message: `Starting game... playing against ${session[0]}`};
+}
 
 server.listen(port, (err) => {  
   if (err) {

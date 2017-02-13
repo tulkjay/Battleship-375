@@ -1,10 +1,5 @@
-<div (keydown) = "onKey($event)"> 
-<!--After Socket IO connection flushed out, add UI components here-->
-<!--<div>Stats: 
-    <div>Shots Fired: {{shotsFired}}</div>
-    <div>Ships Sunk: {{shipsSunk}}</div>
-    <div>Ships Lost: {{shipsLost}}</div>
-    <div>Hit/Miss Ratio: {{hitMissRatio}}</div>
-</div>-->
+<div (window:keydown) = "onKey($event)"> 
+<header></header>
 <grid></grid>
+<scoreboard></scoreboard>
 </div>

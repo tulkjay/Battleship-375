@@ -5,19 +5,26 @@ import { HttpModule } from '@angular/http';
 import { AppComponent } from './components/app/app.component';
 import { GridComponent } from './components/grid/grid.component';
 import { MainComponent } from './components/main/main.component';
+import { HeaderComponent } from './components/header/header.component';
+import { ScoreboardComponent } from './components/scoreboard/scoreboard.component';
+import {SocketService} from './services/socket.service';
 
 @NgModule({
   declarations: [
     AppComponent, 
+    MainComponent, 
+    HeaderComponent,
     GridComponent, 
-    MainComponent
+    ScoreboardComponent, 
   ],
   imports: [
     BrowserModule,
     FormsModule,
     HttpModule
   ],
-  providers: [],
+  providers: [
+    SocketService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
