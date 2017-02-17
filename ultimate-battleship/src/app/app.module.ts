@@ -7,7 +7,9 @@ import { GridComponent } from './components/grid/grid.component';
 import { MainComponent } from './components/main/main.component';
 import { HeaderComponent } from './components/header/header.component';
 import { ScoreboardComponent } from './components/scoreboard/scoreboard.component';
+import { MessageComponent } from './components/message/message.component';
 import {SocketService} from './services/socket.service';
+import {MessageService} from './services/message.service';
 
 @NgModule({
   declarations: [
@@ -16,6 +18,7 @@ import {SocketService} from './services/socket.service';
     HeaderComponent,
     GridComponent, 
     ScoreboardComponent, 
+    MessageComponent, 
   ],
   imports: [
     BrowserModule,
@@ -23,7 +26,8 @@ import {SocketService} from './services/socket.service';
     HttpModule
   ],
   providers: [
-    SocketService
+    SocketService, 
+    MessageService
   ],
   bootstrap: [AppComponent]
 })

@@ -1,5 +1,6 @@
 import {Component, Input} from '@angular/core';
-import { SocketService } from'../../services/socket.service';
+import { SocketService } from '../../services/socket.service';
+import { BoardSetup } from '../../models/game';
 
 @Component({
   selector: 'grid',
@@ -11,8 +12,10 @@ export class GridComponent {
   rows: Array<Row>;  
   socket: SocketIOClient.Socket;
   turn: boolean;
+  setup: BoardSetup;
 
   constructor(private socketService: SocketService) {    
+    this.setup = new BoardSetup();
     this.socket = this.socketService.getConnection();
     this.rows = new Array(10);
         

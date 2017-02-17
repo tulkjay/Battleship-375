@@ -1,0 +1,35 @@
+.hidden {
+  display: none;
+}
+.active {
+  position: fixed;
+  height: 200px;
+  width: 450px;
+  margin-left: 35%;
+  margin-top: 15%;
+  background-color: black;
+  border-radius: 20px;
+  color: white;
+  font-family: monospace;
+  font-size: 2.5em;
+  padding: 10px;
+  text-align: center;
+  line-height: 100px;
+  animation-delay: 3s;
+  animation: 1s 1 fadeOut; 
+  z-index: -1;
+}
+@keyframes fadeOut {
+  0% {
+    z-index: 5;    
+    opacity: 1;    
+  }
+  70% {
+    z-index: 5;    
+    opacity: 1;    
+  }
+  100% {
+    z-index: 5;        
+    opacity: 0;
+  }  
+}
