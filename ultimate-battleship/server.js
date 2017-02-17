@@ -21,7 +21,7 @@ io.on('connection', socket => {
 
       let playerOneUpdate = {
         gameReady: connectionResult.gameReady, 
-        message: `Starting game, playing against Player 2(${socket.id})`, 
+        message: `Starting game, playing against ${session[1].name}`, 
         isTurn: true
       }
       
@@ -49,7 +49,9 @@ io.on('connection', socket => {
   //Game end
   socket.on('game-lost', () => {    
     let winnerId = session.filter(player => player.id !== socket.id)[0].id;
+    
     socket.emit('game-end', 'You have lost the battle...');
+    
     io.to(winnerId).emit('game-end', 'You have won the battle!!!')
   })
 
@@ -77,7 +79,7 @@ function placePlayer(id) {
 
   return { 
     gameReady:true, 
-    message: `Starting game... playing against ${session[0].name}(${session[0].id})`, 
+    message: `Starting game... playing against ${session[0].name}`, 
     isTurn: false};
 }
 

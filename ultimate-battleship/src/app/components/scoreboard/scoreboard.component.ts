@@ -12,6 +12,7 @@ export class ScoreboardComponent {
   shipsSunk: number;
   shipsLost: number;
   hitMissRatio: number;
+
   constructor() {
     this.shotsFired = 14;
     this.shotsHit = 6;
@@ -19,5 +20,4 @@ export class ScoreboardComponent {
     this.shipsLost = 0;
     this.hitMissRatio = this.shotsHit/this.shotsFired;
   }
-
 }

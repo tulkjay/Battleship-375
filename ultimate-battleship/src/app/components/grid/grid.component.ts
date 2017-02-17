@@ -25,8 +25,8 @@ export class GridComponent {
   }  
 
   fire(square: Square, shotCount: number): number {
-    if (square.selected || !this.socketService.isTurn()) return shotCount;    
-    console.log("Firing")
+    if (square.selected || !this.socketService.isTurn()) return shotCount;
+        
     square.selected = true;
     this.socket.emit('shot-fired', square);
     this.socketService.changeTurn();

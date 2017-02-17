@@ -14,7 +14,7 @@ import { Message } from '../../models/message';
 
 export class MessageComponent implements OnInit{  
   message: Message;
-  listener = null;
+  listener:any;
 
   constructor(private messageService: MessageService){      
     this.message = new Message('');  

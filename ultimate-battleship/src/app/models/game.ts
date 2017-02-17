@@ -35,8 +35,3 @@ export class BoardSetup {
     this.ships[ship.name].position = position;
   }
 }
-export class Game {
-  constructor() {
-
-  }
-}
