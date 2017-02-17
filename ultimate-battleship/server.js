@@ -32,24 +32,30 @@ io.on('connection', socket => {
   })
 
   socket.on('setup-complete', () => {
-    if(session[0].ready && session[1].ready) socket.emit('game-ready');
+    if(session[0].ready && session[1].ready) {
+      socket.emit('game-ready');
+    }
   })  
 
   //Game start
   socket.on('shot-fired', location => {
     
     //Convert to character or do whatever to let the leds know what to do.
-
-    let recipientId = session.filter(id => id !== socket.id);    
+  
+    let recipientId = session.filter(player => player.id !== socket.id)[0].id;  
     io.to(recipientId).emit('shot-received', location);
   })
   
   //Game end
+  socket.on('game-lost', () => {    
+    let winnerId = session.filter(player => player.id !== socket.id)[0].id;
+    socket.emit('game-end', 'You have lost the battle...');
+    io.to(winnerId).emit('game-end', 'You have won the battle!!!')
+  })
 
   //This is fire on window close/refresh(client side)
   socket.on('disconnect', () => {
-    console.log("Disconnecting")
-    session = session.filter(ids => ids !== socket.id);
+    session = session.filter(player => player.id !== socket.id);
   });
 })
 

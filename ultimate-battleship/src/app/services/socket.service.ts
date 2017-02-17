@@ -13,15 +13,24 @@ export class SocketService{
     this.socket = io('http://localhost:3000');
 
     this.socket.on('connection-result', response => {        
-        if(response.isTurn) this.setTurn(response.isTurn);        
-        this.messageService.send(new Message('Connected'));        
-      }); 
+      if(response.isTurn) this.setTurn(response.isTurn);        
+      this.messageService.send(new Message(response.message));        
+    });
+
+    this.socket.on('shot-received', response => {        
+      this.changeTurn();
+      this.messageService.send(new Message(`Shot received at (${response.x},${response.y})`));        
+    });
   }
 
   getConnection(): SocketIOClient.Socket{    
     return this.socket;
   }
   
+  changeTurn():void {
+    this.isPlayerTurn = !this.isPlayerTurn;
+  }
+
   connectPlayer():void {
     this.socket.emit('add-player', err => {
       if(err) console.log(`Error: ${err}`);
@@ -30,10 +39,6 @@ export class SocketService{
 
   setTurn(isTurn: boolean):void {
     this.isPlayerTurn = isTurn;
-  }
-
-  changeTurn():void {
-    this.isPlayerTurn = !this.isPlayerTurn;
   }
 
   isTurn():boolean {

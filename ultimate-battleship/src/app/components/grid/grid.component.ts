@@ -22,16 +22,11 @@ export class GridComponent {
     for (let i = 0; i < 10; i++) {
       this.rows[i] = new Row(i);
     }
-    
-    this.socket.on('shot-received', location => {
-      this.socketService.changeTurn();
-      console.log('Shot received:', location)
-    });
   }  
 
   fire(square: Square, shotCount: number): number {
     if (square.selected || !this.socketService.isTurn()) return shotCount;    
-
+    console.log("Firing")
     square.selected = true;
     this.socket.emit('shot-fired', square);
     this.socketService.changeTurn();

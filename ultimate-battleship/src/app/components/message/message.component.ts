@@ -30,6 +30,6 @@ export class MessageComponent implements OnInit{
 
     setTimeout(() => {
       this.message.active = false;
-    }, 1000);
+    }, 4000);
   }
 }
