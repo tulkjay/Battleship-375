@@ -1,7 +1,6 @@
 import { Subject } from 'rxjs';
-import { Message } from '../models';
 
-export class MessageEmitter extends Subject<Message>{
+export class KeyEmitter extends Subject<string>{
   constructor() { 
     super(); 
   }

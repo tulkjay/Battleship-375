@@ -1,4 +1,9 @@
 <div class="scoreboard">
+    <div class="ship" draggable="true" (dragstart)="dragShip($event, 'carrier')" (click)="setShip('carrier')">Carrier</div>
+    <div class="ship" draggable="true" (dragstart)="dragShip($event, 'battleship')" (click)="setShip('battleship')">Battleship</div>
+    <div class="ship" draggable="true" (dragstart)="dragShip($event, 'cruiser')" (click)="setShip('cruiser')">Cruiser</div>
+    <div class="ship" draggable="true" (dragstart)="dragShip($event, 'submarine')" (click)="setShip('submarine')">Submarine</div>
+    <div class="ship" draggable="true" (dragstart)="dragShip($event, 'destroyer')" (click)="setShip('destroyer')">Destroyer</div>
     <div>Shots Fired: {{shotsFired}}</div>    
     <div>Ships Sunk: {{shipsSunk}}</div>
     <div>Ships Lost: {{shipsLost}}</div>

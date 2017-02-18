@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MessageService } from './message.service';
-import { Message } from '../models/message';
+import { Message } from '../models';
 import * as io from 'socket.io-client';
 
 @Injectable()

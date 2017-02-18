@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container" (dragover)="allowShipSet($event)" (drop)="dropShip($event)">
   <input type="hidden">
   <div class="row" *ngFor="let row of rows">
     <div class="square"

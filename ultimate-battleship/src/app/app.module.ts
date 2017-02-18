@@ -10,6 +10,7 @@ import { ScoreboardComponent } from './components/scoreboard/scoreboard.componen
 import { MessageComponent } from './components/message/message.component';
 import { SocketService } from './services/socket.service';
 import { MessageService } from './services/message.service';
+import { GameService } from './services/game.service';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { MessageService } from './services/message.service';
   ],
   providers: [
     SocketService, 
-    MessageService
+    MessageService,
+    GameService
   ],
   bootstrap: [AppComponent]
 })

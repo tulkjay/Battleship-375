@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
+import { GameService } from '../../services/game.service';
 import { HeaderComponent } from '../header/header.component';
 import { GridComponent } from '../grid/grid.component';
 import { ScoreboardComponent } from '../scoreboard/scoreboard.component';
+
 @Component({
   selector: 'main',
   templateUrl: './main.component.html',
@@ -10,7 +12,9 @@ import { ScoreboardComponent } from '../scoreboard/scoreboard.component';
 
 export class MainComponent {
 
+  constructor(private gameService: GameService){}
+
   onKey(event: any){
-    console.log("Key pressed: ", event.key.replace("Arrow", ""));    
+    this.gameService.sendKeyStroke(event.key.replace("Arrow", ""));
   }
 }

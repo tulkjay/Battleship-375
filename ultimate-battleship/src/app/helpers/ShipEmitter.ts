@@ -1,7 +1,7 @@
 import { Subject } from 'rxjs';
-import { Message } from '../models';
+import { Ship } from '../models';
 
-export class MessageEmitter extends Subject<Message>{
+export class ShipEmitter extends Subject<Ship>{
   constructor() { 
     super(); 
   }
