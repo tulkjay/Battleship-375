@@ -2,10 +2,12 @@
   <input type="hidden">
   <div class="row" *ngFor="let row of rows">
     <div class="square"
-         [style.background-color]="square.selected ? 'red' : 'cornflowerblue'"
+         [style.background-color]="getSquareColor(square)"
          *ngFor="let square of row.squares"
          (click)="fire(square)">      
-      <span *ngIf="square.selected">Shot Fired</span>
+      <span *ngIf="square.locked">Locked</span>
+      <!--This will be reimplemented on game start-->
+      <!--<span *ngIf="square.selected">Shot Fired</span>-->
     </div>
   </div>
 </div>

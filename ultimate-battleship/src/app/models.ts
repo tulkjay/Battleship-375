@@ -25,23 +25,25 @@ export class Ship {
   size: number;
   position: {
     x:number, 
-    y: number
+    y: number, 
   }
 
   constructor(name?:string, size?:number) {
     this.name = name;
     this.size = size;
+    
   }
 }
 
 export class Square {
   selected: boolean;
   x: number;
-  y: number;
-  
+  y: number;  
+  locked: boolean;
   constructor(x: number, y: number) {
     this.selected = false;
     this.x = x;
     this.y = y;
+    this.locked = false;
   }
 }

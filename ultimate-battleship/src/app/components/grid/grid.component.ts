@@ -16,32 +16,52 @@ export class GridComponent {
   selectedShip: Ship;
   shipListener:any;
   keyStrokeListener:any;
+  orientation: string;
 
   constructor(private socketService: SocketService, private gameService: GameService) {    
+    this.orientation = 'column';
     this.socket = this.socketService.getConnection();
     this.shipListener = gameService.ShipStream.subscribe(ship => this.setShip(ship))    
     this.keyStrokeListener = gameService.KeyStream.subscribe(key => this.applyKeyStroke(key))
-    this.constructBoard();
+    this.constructBoard();    
   }  
 
   applyKeyStroke(key:string) {
     console.log("Key caught", key);
     switch (key) {
       case 'Up':
-        this.setShip(this.selectedShip, 0, -1);
+        this.moveShip(0, -1);
         break;
       case 'Down':
-        this.setShip(this.selectedShip, 0, 1);
+        this.moveShip(0, 1);
         break;
       case 'Left':
-        this.setShip(this.selectedShip, 1, 0);
+        this.moveShip(-1, 0);
         break;
       case 'Right':
-        this.setShip(this.selectedShip, -1, 0);
-        break;    
+        this.moveShip(1, 0);
+        break;
+      case 'Home':
+        this.swapOrientation();   
+        break;
+      case 'Enter':
+        this.lockShip()
+        break;
       default:
         break;
     }
+  }
+
+  lockShip() {
+    if(this.orientation === 'column') {
+      for(let i = 0; i < this.selectedShip.size; i++) {
+        this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].locked = true;
+      }
+    } else if(this.orientation === 'row') {
+      for(let i = 0; i < this.selectedShip.size; i++) {
+        this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].locked = true;
+      }
+    }    
   }
 
   constructBoard() {
@@ -52,14 +72,102 @@ export class GridComponent {
     }    
   }
 
-  setShip(ship:Ship, x?:number, y?:number, orientationChange?:number) {
+  swapOrientation(){
+    const max = this.selectedShip.size;        
+
+    if(this.orientation === 'column') {
+      if(this.selectedShip.position.x <= (10 - this.selectedShip.size)) {
+        for(let i = 0; i < max; i++) {
+          this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].selected = false;                          
+        }
+        for(let i = 0; i < max; i++) {
+          this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].selected = true;
+        } 
+      
+        this.orientation = 'row';
+      }
+    }
+    else {
+      if(this.selectedShip.position.y <= (10 - this.selectedShip.size)) {
+        for(let i = 0; i < max; i++) {
+          this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].selected = false;                          
+        }
+        for(let i = 0; i < max; i++) {
+          this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].selected = true;
+        } 
+        this.orientation = 'column'
+      }
+    }
+  }
+
+  moveShip(x?:number, y?:number) {
+      const max = this.selectedShip.size; 
+
+      if(this.orientation === 'column') {
+        for(let i = 0; i < max; i++) {
+          this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].selected = false;                          
+        }
+        
+        if(x < 0 ) {
+          this.selectedShip.position.x > 0 ? this.selectedShip.position.x += x : this.selectedShip.position.x;
+        } else if(x > 0) {
+          this.selectedShip.position.x < 9 ? this.selectedShip.position.x += x : this.selectedShip.position.x;
+        }
+
+        if(y < 0) {
+          this.selectedShip.position.y > 0 ? this.selectedShip.position.y += y : this.selectedShip.position.y;
+        } else if(y > 0) {
+          this.selectedShip.position.y <= (9 - this.selectedShip.size) ? this.selectedShip.position.y += y : this.selectedShip.position.y;
+        }
+
+        for(let i = 0; i < max; i++) {
+          this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].selected = true;
+        }
+      }
+      else {
+        for(let i = 0; i < max; i++) {
+          this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].selected = false;                          
+        }
+        
+        if(x < 0 ) {
+          this.selectedShip.position.x > 0 ? this.selectedShip.position.x += x : this.selectedShip.position.x;
+        } else if(x > 0) {
+          this.selectedShip.position.x <= (9 - this.selectedShip.size) ? this.selectedShip.position.x += x : this.selectedShip.position.x;
+        }
+
+        if(y < 0) {
+          this.selectedShip.position.y > 0 ? this.selectedShip.position.y += y : this.selectedShip.position.y;
+        } else if(y > 0) {
+          this.selectedShip.position.y < 9 ? this.selectedShip.position.y += y : this.selectedShip.position.y;
+        }
+
+        for(let i = 0; i < max; i++) {
+          this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].selected = true;
+        }
+      } 
+  }
+
+  setShip(ship:Ship, x?:number, y?:number) {
     this.selectedShip = ship;
-    
+    this.selectedShip.position = {x: 0, y: 0};
+
     for(let i = 0; i < ship.size; i++) {
       this.rows[i].squares[0].selected = !this.rows[i].squares[0].selected;
     }        
   }
-  
+
+  getSquareColor(square:Square) {    
+    if(square.locked) {
+      return 'chartreuse';
+    }
+    else if(square.selected) {
+      return 'red'
+    }
+    else {
+      return 'cornflowerblue'
+    }     
+  }
+
   dropShip(event:any){
     event.preventDefault();
     var ship = JSON.parse(event.dataTransfer.getData('ship'));
