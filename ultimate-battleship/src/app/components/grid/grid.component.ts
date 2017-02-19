@@ -62,6 +62,7 @@ export class GridComponent {
         this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].locked = true;
       }
     }    
+    this.setShip(new Ship());    
   }
 
   constructBoard() {
