@@ -17,9 +17,11 @@ export class GridComponent {
   shipListener:any;
   keyStrokeListener:any;
   orientation: string;
+  boardKey:Array<string>;
 
   constructor(private socketService: SocketService, private gameService: GameService) {    
     this.orientation = 'column';
+    this.boardKey = [];
     this.socket = this.socketService.getConnection();
     this.shipListener = gameService.ShipStream.subscribe(ship => this.setShip(ship))    
     this.keyStrokeListener = gameService.KeyStream.subscribe(key => this.applyKeyStroke(key))
@@ -53,15 +55,41 @@ export class GridComponent {
   }
 
   lockShip() {
+    let valid = true;
+
+    //Check if space is occupied
+    if(this.orientation === 'column') {
+      for(let i = 0; i < this.selectedShip.size; i++) {        
+        if(this.boardKey.find(location => location === `${this.selectedShip.position.x}${this.selectedShip.position.y + i}`)) {          
+          console.log("Cannot lock location, it is already occupied!");
+          valid = false;
+          return;
+        }     
+      }
+    } else if(this.orientation === 'row') {
+      for(let i = 0; i < this.selectedShip.size; i++) {
+        if(this.boardKey.find(location => location === `${this.selectedShip.position.x + i}${this.selectedShip.position.y}`)) {          
+          console.log("Cannot lock location, it is already occupied!");
+          valid = false;
+          return;
+        }        
+      }
+    }
+      if(!valid) return;
+    
+    //Lock location
     if(this.orientation === 'column') {
       for(let i = 0; i < this.selectedShip.size; i++) {
         this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].locked = true;
+        this.boardKey.push(`${this.selectedShip.position.x}${this.selectedShip.position.y + i}`)
       }
     } else if(this.orientation === 'row') {
       for(let i = 0; i < this.selectedShip.size; i++) {
         this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].locked = true;
+        this.boardKey.push(`${this.selectedShip.position.x + i}${this.selectedShip.position.y}`)  
       }
-    }    
+    } 
+    this.orientation = 'column';
     this.setShip(new Ship());    
   }
 
@@ -125,7 +153,7 @@ export class GridComponent {
           this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].selected = true;
         }
       }
-      else {
+      else if(this.orientation === 'row') {
         for(let i = 0; i < max; i++) {
           this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].selected = false;                          
         }
