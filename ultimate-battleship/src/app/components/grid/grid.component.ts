@@ -89,7 +89,6 @@ export class GridComponent {
         this.boardKey.push(`${this.selectedShip.position.x + i}${this.selectedShip.position.y}`)  
       }
     } 
-    this.orientation = 'column';
     this.setShip(new Ship());    
   }
 
@@ -179,9 +178,32 @@ export class GridComponent {
   setShip(ship:Ship, x?:number, y?:number) {
     this.selectedShip = ship;
     this.selectedShip.position = {x: 0, y: 0};
+    this.orientation = 'column';
 
-    for(let i = 0; i < ship.size; i++) {
-      this.rows[i].squares[0].selected = !this.rows[i].squares[0].selected;
+    //Check if starting position is taken, move column right if not
+    let valid = true;
+    let startingRow = 0; 
+    let startingColumn = 0;
+
+    do {
+      valid = true;
+
+      for(let i = startingRow; i < ship.size; i++) {
+        if(this.boardKey.find(location => location === `${i}${startingColumn}`)) {
+          valid = false;
+        }
+      }
+      if(!valid) startingRow++;
+      if(startingRow === 10 - ship.size) {
+        startingRow = 0;
+        startingColumn = 0;
+      }      
+    } while(!valid);
+
+
+    //Set starting ship position
+    for(let i = startingRow; i < ship.size; i++) {
+      this.rows[i].squares[startingColumn].selected = !this.rows[i].squares[startingColumn].selected;
     }        
   }
 
