@@ -180,31 +180,33 @@ export class GridComponent {
     this.selectedShip.position = {x: 0, y: 0};
     this.orientation = 'column';
 
-    //Check if starting position is taken, move column right if not
     let valid = true;
     let startingRow = 0; 
     let startingColumn = 0;
 
     do {
       valid = true;
-
       for(let i = startingRow; i < ship.size; i++) {
-        if(this.boardKey.find(location => location === `${i}${startingColumn}`)) {
-          valid = false;
+        if(this.boardKey.find(location => location === `${startingColumn}${i}`)) {
+          valid = false;          
         }
       }
-      if(!valid) startingRow++;
-      if(startingRow === 10 - ship.size) {
-        startingRow = 0;
-        startingColumn = 0;
+
+      if(!valid) {
+        startingColumn++;
+        if(startingColumn === 10 - ship.size) {
+          startingRow++;
+          startingColumn = 0;
+        }      
       }      
     } while(!valid);
-
 
     //Set starting ship position
     for(let i = startingRow; i < ship.size; i++) {
       this.rows[i].squares[startingColumn].selected = !this.rows[i].squares[startingColumn].selected;
     }        
+    this.selectedShip.position.x = startingColumn;
+    this.selectedShip.position.y = startingRow;
   }
 
   getSquareColor(square:Square) {    
