@@ -70,7 +70,7 @@ function placePlayer(id) {
 
     return { 
       gameReady:false,
-      message: 'Waiting for other player...'};
+      message: 'Waiting for other player to join...'};
   }
   session[1] = {
       id: id, 

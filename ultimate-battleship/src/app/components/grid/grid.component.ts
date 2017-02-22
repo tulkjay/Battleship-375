@@ -1,7 +1,8 @@
 import {Component, Input} from '@angular/core';
 import { SocketService } from '../../services/socket.service';
 import { GameService } from '../../services/game.service';
-import { Ship, Row, Square} from '../../models';
+import { MessageService } from '../../services/message.service';
+import { Ship, Row, Square, Message} from '../../models';
 
 @Component({
   selector: 'grid',
@@ -17,19 +18,45 @@ export class GridComponent {
   shipListener:any;
   keyStrokeListener:any;
   orientation: string;
-  boardKey:Array<string>;
+  boardKey:Array<string>;  
+  shipsKey:Array<any>;
+  selectedShipKey:number;
 
-  constructor(private socketService: SocketService, private gameService: GameService) {    
+  constructor(private socketService: SocketService, private gameService: GameService, private messageService: MessageService) {    
+    this.shipsKey = [
+      { ship: new Ship('carrier', 5), 
+        lockedLocation: [{x:0,y:0}], 
+        isLocked:false
+      },
+      { ship: new Ship('battleship', 4), 
+        lockedLocation: [{x:0,y:0}], 
+        isLocked:false
+      },      
+      { ship: new Ship('cruiser', 3), 
+        lockedLocation: [{x:0,y:0}], 
+        isLocked:false
+      },
+      { ship: new Ship('submarine', 3), 
+        lockedLocation: [{x:0,y:0}], 
+        isLocked:false
+      },
+      { ship: new Ship('destroyer', 2), 
+        lockedLocation: [{x:0,y:0}], 
+        isLocked:false
+      }    
+    ];
+    this.selectedShipKey = 0;
     this.orientation = 'column';
     this.boardKey = [];
     this.socket = this.socketService.getConnection();
     this.shipListener = gameService.ShipStream.subscribe(ship => this.setShip(ship))    
     this.keyStrokeListener = gameService.KeyStream.subscribe(key => this.applyKeyStroke(key))
-    this.constructBoard();    
+    this.constructBoard(); 
+    this.setShip(this.shipsKey[0].ship);
   }  
 
   applyKeyStroke(key:string) {
-    console.log("Key caught", key);
+    if(!this.selectedShip) return;
     switch (key) {
       case 'Up':
         this.moveShip(0, -1);
@@ -49,9 +76,45 @@ export class GridComponent {
       case 'Enter':
         this.lockShip()
         break;
+      case 'End':
+        this.changeSelectedShip(-1);
+        break;
+      case 'PageDown':
+        this.changeSelectedShip(1);
+        break;
       default:
         break;
     }
+  }
+
+  changeSelectedShip(direction:number) {        
+    if(direction < 0 && !(this.shipsKey[0].ship.name === this.selectedShip.name)) {
+      let unlockedShipKey = this.shipsKey.filter((item, index) => index <= this.selectedShipKey + direction && !item.isLocked);
+      
+      if(!unlockedShipKey[unlockedShipKey.length - 1]) return;
+      
+      this.removeSelectedShip();
+      this.selectedShipKey += direction;
+
+      let previousShip = this.shipsKey.filter((ship, index) => index === this.selectedShipKey)[0];
+      
+      this.setShip(previousShip.ship);
+    } else if( direction > 0 && !(this.shipsKey[4].ship.name === this.selectedShip.name)) {
+      
+      let unlockedShipKey = this.shipsKey.filter((item, index) => index >= this.selectedShipKey + direction && !item.isLocked)[0];
+      if(!unlockedShipKey) return;
+      
+      this.removeSelectedShip();
+      this.selectedShipKey += direction;   
+
+      let nextShip = this.shipsKey.filter((ship, index) => index === this.selectedShipKey)[0];
+      
+      this.setShip(nextShip.ship);
+    }    
+  }
+
+  unlockShip() {
+
   }
 
   lockShip() {
@@ -62,7 +125,7 @@ export class GridComponent {
       for(let i = 0; i < this.selectedShip.size; i++) {        
         if(this.boardKey.find(location => location === `${this.selectedShip.position.x}${this.selectedShip.position.y + i}`)) {          
           console.log("Cannot lock location, it is already occupied!");
-          valid = false;
+          valid = false;          
           return;
         }     
       }
@@ -77,7 +140,7 @@ export class GridComponent {
     }
       if(!valid) return;
     
-    //Lock location
+    //Lock location    
     if(this.orientation === 'column') {
       for(let i = 0; i < this.selectedShip.size; i++) {
         this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].locked = true;
@@ -88,8 +151,20 @@ export class GridComponent {
         this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].locked = true;
         this.boardKey.push(`${this.selectedShip.position.x + i}${this.selectedShip.position.y}`)  
       }
-    } 
-    this.setShip(new Ship());    
+    }
+
+    this.shipsKey[this.selectedShipKey].isLocked = true;
+
+    //Move to the next available ship   
+    let nextRemainingShipKey = this.shipsKey.filter(item => !item.isLocked)[0]; 
+    if(nextRemainingShipKey) {
+      this.selectedShipKey = this.shipsKey.indexOf(nextRemainingShipKey);
+      this.setShip(this.shipsKey[this.selectedShipKey].ship);    
+    }  
+    else{
+      this.messageService.send(new Message('All set! Waiting for other player...'));
+      this.selectedShip = null;
+    }      
   }
 
   constructBoard() {
@@ -101,14 +176,12 @@ export class GridComponent {
   }
 
   swapOrientation(){
-    const max = this.selectedShip.size;        
-
     if(this.orientation === 'column') {
       if(this.selectedShip.position.x <= (10 - this.selectedShip.size)) {
-        for(let i = 0; i < max; i++) {
+        for(let i = 0; i < this.selectedShip.size; i++) {
           this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].selected = false;                          
         }
-        for(let i = 0; i < max; i++) {
+        for(let i = 0; i < this.selectedShip.size; i++) {
           this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].selected = true;
         } 
       
@@ -117,10 +190,10 @@ export class GridComponent {
     }
     else {
       if(this.selectedShip.position.y <= (10 - this.selectedShip.size)) {
-        for(let i = 0; i < max; i++) {
+        for(let i = 0; i < this.selectedShip.size; i++) {
           this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].selected = false;                          
         }
-        for(let i = 0; i < max; i++) {
+        for(let i = 0; i < this.selectedShip.size; i++) {
           this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].selected = true;
         } 
         this.orientation = 'column'
@@ -128,13 +201,21 @@ export class GridComponent {
     }
   }
 
-  moveShip(x?:number, y?:number) {
-      const max = this.selectedShip.size; 
+  removeSelectedShip(){
+    if(this.orientation === 'column') {
+      for(let i = 0; i < this.selectedShip.size; i++) {
+        this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].selected = false;                          
+      }
+    } else if(this.orientation === 'row') {
+      for(let i = 0; i < this.selectedShip.size; i++) {
+        this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].selected = false;                          
+      }
+    }
+  }
 
+  moveShip(x?:number, y?:number) {
       if(this.orientation === 'column') {
-        for(let i = 0; i < max; i++) {
-          this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].selected = false;                          
-        }
+        this.removeSelectedShip();
         
         if(x < 0 ) {
           this.selectedShip.position.x > 0 ? this.selectedShip.position.x += x : this.selectedShip.position.x;
@@ -148,14 +229,12 @@ export class GridComponent {
           this.selectedShip.position.y <= (9 - this.selectedShip.size) ? this.selectedShip.position.y += y : this.selectedShip.position.y;
         }
 
-        for(let i = 0; i < max; i++) {
+        for(let i = 0; i < this.selectedShip.size; i++) {
           this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].selected = true;
         }
       }
       else if(this.orientation === 'row') {
-        for(let i = 0; i < max; i++) {
-          this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].selected = false;                          
-        }
+        this.removeSelectedShip();
         
         if(x < 0 ) {
           this.selectedShip.position.x > 0 ? this.selectedShip.position.x += x : this.selectedShip.position.x;
@@ -169,13 +248,14 @@ export class GridComponent {
           this.selectedShip.position.y < 9 ? this.selectedShip.position.y += y : this.selectedShip.position.y;
         }
 
-        for(let i = 0; i < max; i++) {
+        for(let i = 0; i < this.selectedShip.size; i++) {
           this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].selected = true;
         }
       } 
   }
 
   setShip(ship:Ship, x?:number, y?:number) {
+    let startingPosition = 0;
     this.selectedShip = ship;
     this.selectedShip.position = {x: 0, y: 0};
     this.orientation = 'column';
@@ -224,6 +304,7 @@ export class GridComponent {
   dropShip(event:any){
     event.preventDefault();
     var ship = JSON.parse(event.dataTransfer.getData('ship'));
+    
     this.gameService.setSelectedShip(ship);
   }
 
