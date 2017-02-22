@@ -201,7 +201,9 @@ export class GridComponent {
     }
   }
 
-  removeSelectedShip(){
+  removeSelectedShip(){  
+    this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x].text = null;
+
     if(this.orientation === 'column') {
       for(let i = 0; i < this.selectedShip.size; i++) {
         this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].selected = false;                          
@@ -228,6 +230,9 @@ export class GridComponent {
         } else if(y > 0) {
           this.selectedShip.position.y <= (9 - this.selectedShip.size) ? this.selectedShip.position.y += y : this.selectedShip.position.y;
         }
+        if(!this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x].text)
+          this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x].text = this.selectedShip.name;
+        
 
         for(let i = 0; i < this.selectedShip.size; i++) {
           this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].selected = true;
@@ -247,7 +252,10 @@ export class GridComponent {
         } else if(y > 0) {
           this.selectedShip.position.y < 9 ? this.selectedShip.position.y += y : this.selectedShip.position.y;
         }
-
+        
+        if(!this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x].text)
+          this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x].text = this.selectedShip.name;
+        
         for(let i = 0; i < this.selectedShip.size; i++) {
           this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].selected = true;
         }
@@ -287,6 +295,7 @@ export class GridComponent {
     }        
     this.selectedShip.position.x = startingColumn;
     this.selectedShip.position.y = startingRow;
+    this.rows[startingRow].squares[startingColumn].text = this.selectedShip.name;
   }
 
   getSquareColor(square:Square) {    

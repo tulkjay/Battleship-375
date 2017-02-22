@@ -5,6 +5,7 @@
          [style.background-color]="getSquareColor(square)"
          *ngFor="let square of row.squares"
          (click)="fire(square)">      
+         {{square.text}}
       <span *ngIf="square.locked">Locked</span>
       <!--This will be reimplemented on game start-->
       <!--<span *ngIf="square.selected">Shot Fired</span>-->

@@ -31,7 +31,6 @@ export class Ship {
   constructor(name?:string, size?:number) {
     this.name = name;
     this.size = size;
-    
   }
 }
 
@@ -40,10 +39,12 @@ export class Square {
   x: number;
   y: number;  
   locked: boolean;
-  constructor(x: number, y: number) {
+  text: string;
+  constructor(x: number, y: number, text?: string) {
     this.selected = false;
     this.x = x;
     this.y = y;
     this.locked = false;
+    this.text = text;
   }
 }
