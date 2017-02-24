@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MessageService } from './message.service';
+import { GameService } from './game.service';
 import { Message } from '../models';
 import * as io from 'socket.io-client';
 
@@ -8,7 +9,7 @@ export class SocketService{
   socket: SocketIOClient.Socket;
   isPlayerTurn: boolean;
   
-  constructor(private messageService: MessageService){
+  constructor(private messageService: MessageService, private gameService: GameService){
     this.isPlayerTurn = false;
     this.socket = io('http://localhost:3000');
 
@@ -21,12 +22,20 @@ export class SocketService{
       this.changeTurn();
       this.messageService.send(new Message(`Shot received at (${response.x},${response.y})`));        
     });
+
+    this.socket.on('state-changed', state => {
+      this.gameService.setGameState(state);
+    })
+  }
+
+  emit(callName:string, ...args:Array<any>) {
+    this.socket.emit(callName, args);
   }
 
   getConnection(): SocketIOClient.Socket{    
     return this.socket;
-  }
-  
+  }    
+
   changeTurn():void {
     this.isPlayerTurn = !this.isPlayerTurn;
   }

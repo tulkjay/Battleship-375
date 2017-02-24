@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { SocketService } from '../services/socket.service';
 import { KeyEmitter } from '../helpers/KeyEmitter';
 import { ShipEmitter } from '../helpers/ShipEmitter';
 import { Ship } from '../models';
@@ -11,13 +10,22 @@ import { Ship } from '../models';
    KeyStream: KeyEmitter;
    selectedShip: Ship;
    listener:any;
+   state:string;
 
-   constructor(private socketService: SocketService) {
+   constructor() {
     this.ShipStream = new ShipEmitter();
     this.KeyStream = new KeyEmitter();
     this.selectedShip = new Ship();    
+    this.state = 'waiting';        
    }
    
+   setGameState(state:string) {
+    console.log("The game's state has been set to: ", state);
+   }
+
+   getGameState():string {
+    return this.state;
+   }
    sendKeyStroke(key:string) {
      this.KeyStream.emit(key);
    }

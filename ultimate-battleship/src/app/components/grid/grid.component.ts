@@ -23,6 +23,7 @@ export class GridComponent {
   selectedShipKey:number;
 
   constructor(private socketService: SocketService, private gameService: GameService, private messageService: MessageService) {    
+
     this.shipsKey = [
       { ship: new Ship('carrier', 5), 
         lockedLocation: [{x:0,y:0}], 
@@ -113,10 +114,6 @@ export class GridComponent {
     }    
   }
 
-  unlockShip() {
-
-  }
-
   lockShip() {
     let valid = true;
 
@@ -163,6 +160,7 @@ export class GridComponent {
     }  
     else{
       this.messageService.send(new Message('All set! Waiting for other player...'));
+      this.socketService.emit('test', {selectedShip: this.selectedShip.name});      
       this.selectedShip = null;
     }      
   }

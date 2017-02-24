@@ -8,9 +8,16 @@ const port = 3000;
 app.use(express.static(path.join(__dirname, 'server')));
 let session = [];
 
+const STATES = {
+  waiting: 'waiting', 
+  setup: 'setup', 
+  ready: 'ready', 
+  done: 'done'    
+}
+
 //Socket IO pub/sub definitions
 io.on('connection', socket => {    
-  console.log("New connection, id: ", socket.id)  
+  console.log("New connection, id: ", socket.id)    
 
   //Game setup
   socket.on('add-player', () => {   
@@ -26,9 +33,11 @@ io.on('connection', socket => {
       }
       
       io.to(playerOneId).emit('connection-result', playerOneUpdate);            
+      io.to(playerOneId).emit('state-changed', STATES.setup);            
     }    
     
     socket.emit('connection-result', connectionResult);          
+    socket.emit('state-changed', STATES.setup);          
   })
 
   socket.on('setup-complete', () => {
@@ -59,6 +68,11 @@ io.on('connection', socket => {
   socket.on('disconnect', () => {
     session = session.filter(player => player.id !== socket.id);
   });
+
+  //This is for testing calls
+  socket.on('test', data => {
+    console.log("test received, data: ", data);
+  })
 })
 
 function placePlayer(id) {  
