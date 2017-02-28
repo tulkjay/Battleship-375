@@ -25,6 +25,12 @@ export class SocketService{
 
     this.socket.on('state-changed', state => {
       this.gameService.setGameState(state);
+    });
+
+    this.socket.on('game-ready', response => {
+      console.log("response received: ", response)
+      this.gameService.setGameState(response.state);
+      this.messageService.send(new Message(response.message));
     })
   }
 

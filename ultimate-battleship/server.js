@@ -6,14 +6,16 @@ const io = require('socket.io')(server);
 const port = 3000;
 
 app.use(express.static(path.join(__dirname, 'server')));
-let session = [];
 
 const STATES = {
   waiting: 'waiting', 
   setup: 'setup', 
-  ready: 'ready', 
+  ready: 'in-progress', 
   done: 'done'    
 }
+
+let session = [];
+let gameState = STATES.waiting;
 
 //Socket IO pub/sub definitions
 io.on('connection', socket => {    
@@ -31,22 +33,29 @@ io.on('connection', socket => {
         message: `Starting game, playing against ${session[1].name}`, 
         isTurn: true
       }
-      
+
+      gameState = STATES.setup;
+
       io.to(playerOneId).emit('connection-result', playerOneUpdate);            
-      io.to(playerOneId).emit('state-changed', STATES.setup);            
+      io.to(playerOneId).emit('state-changed', gameState);            
     }    
     
     socket.emit('connection-result', connectionResult);          
-    socket.emit('state-changed', STATES.setup);          
+    socket.emit('state-changed', gameState);          
   })
 
+  //Game start
   socket.on('setup-complete', () => {
+    let player = session.find(player => player.id === socket.id);
+    player.ready = true;
+
     if(session[0].ready && session[1].ready) {
-      socket.emit('game-ready');
+      io.emit('game-ready', {state: STATES.ready, message: 'All set! Begin the Battle!'});      
+    } else {
+      socket.emit('game-ready', {state: STATES.waiting, message: 'All set! Waiting for other player...' })
     }
   })  
 
-  //Game start
   socket.on('shot-fired', location => {
     
     //Convert to character or do whatever to let the leds know what to do.
@@ -59,19 +68,21 @@ io.on('connection', socket => {
   socket.on('game-lost', () => {    
     let winnerId = session.filter(player => player.id !== socket.id)[0].id;
     
-    socket.emit('game-end', 'You have lost the battle...');
+    socket.emit('game-end', {state: STATES.done, message: 'You have lost the battle...'});
     
-    io.to(winnerId).emit('game-end', 'You have won the battle!!!')
+    io.to(winnerId).emit('game-end', {state: STATES.done, message: 'You have won the battle!!!'});
   })
 
-  //This is fire on window close/refresh(client side)
+  //This is fired on window close/refresh(client side)
   socket.on('disconnect', () => {
     session = session.filter(player => player.id !== socket.id);
   });
 
-  //This is for testing calls
+  //This is for testing basic socket i/o connection
   socket.on('test', data => {
     console.log("test received, data: ", data);
+    data['newData'] = 'New Data';
+    socket.emit('test', data);
   })
 })
 
@@ -79,7 +90,8 @@ function placePlayer(id) {
   if(!session.length) {
     session[0] = {
       id: id, 
-      name: 'Player 1'
+      name: 'Player 1', 
+      ready: false
     };
 
     return { 
@@ -88,7 +100,8 @@ function placePlayer(id) {
   }
   session[1] = {
       id: id, 
-      name: 'Player 2'
+      name: 'Player 2', 
+      ready: false
     };  
 
   return { 

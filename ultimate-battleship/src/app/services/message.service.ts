@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { MessageEmitter } from '../helpers/MessageEmitter';
+import { MessageEmitter } from '../emitters';
 import { Message } from '../models';
 
 @Injectable()

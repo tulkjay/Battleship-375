@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
-import { KeyEmitter } from '../helpers/KeyEmitter';
-import { ShipEmitter } from '../helpers/ShipEmitter';
+import { ShipEmitter, KeyEmitter, StateEmitter } from '../emitters';
 import { Ship } from '../models';
 
 @Injectable()
- export class GameService{
+ export class GameService {
    ShipStream: ShipEmitter;
    KeyStream: KeyEmitter;
+   StateStream: StateEmitter;
    selectedShip: Ship;
    listener:any;
    state:string;
@@ -15,17 +15,23 @@ import { Ship } from '../models';
    constructor() {
     this.ShipStream = new ShipEmitter();
     this.KeyStream = new KeyEmitter();
+    this.StateStream = new StateEmitter();
     this.selectedShip = new Ship();    
     this.state = 'waiting';        
    }
    
    setGameState(state:string) {
-    console.log("The game's state has been set to: ", state);
+    if(this.state !== state) {
+      this.state = state;
+      console.log("The game's state has been set to: ", this.state);
+      this.StateStream.emit(this.state)
+    }    
    }
 
    getGameState():string {
     return this.state;
    }
+
    sendKeyStroke(key:string) {
      this.KeyStream.emit(key);
    }

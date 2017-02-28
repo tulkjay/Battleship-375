@@ -4,6 +4,7 @@
     <div class="square"
          [style.background-color]="getSquareColor(square)"
          *ngFor="let square of row.squares"
+         draggable="false"
          (click)="fire(square)">      
          {{square.text}}
       <span *ngIf="square.locked">Locked</span>

@@ -1,8 +1,8 @@
-import {Component, Input} from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { SocketService } from '../../services/socket.service';
 import { GameService } from '../../services/game.service';
 import { MessageService } from '../../services/message.service';
-import { Ship, Row, Square, Message} from '../../models';
+import { Ship, Row, Square, Message } from '../../models';
 
 @Component({
   selector: 'grid',
@@ -17,13 +17,14 @@ export class GridComponent {
   selectedShip: Ship;
   shipListener:any;
   keyStrokeListener:any;
+  gameStateListener:any;
   orientation: string;
   boardKey:Array<string>;  
   shipsKey:Array<any>;
   selectedShipKey:number;
+  selectedPosition:any;
 
-  constructor(private socketService: SocketService, private gameService: GameService, private messageService: MessageService) {    
-
+  constructor(private socketService: SocketService, private gameService: GameService, private messageService: MessageService) {        
     this.shipsKey = [
       { ship: new Ship('carrier', 5), 
         lockedLocation: [{x:0,y:0}], 
@@ -50,38 +51,81 @@ export class GridComponent {
     this.orientation = 'column';
     this.boardKey = [];
     this.socket = this.socketService.getConnection();
-    this.shipListener = gameService.ShipStream.subscribe(ship => this.setShip(ship))    
-    this.keyStrokeListener = gameService.KeyStream.subscribe(key => this.applyKeyStroke(key))
+    this.shipListener = gameService.ShipStream.subscribe(ship => this.setShip(ship));    
+    this.gameStateListener = gameService.StateStream.subscribe(state => this.gameStateChanged(state));    
+    this.keyStrokeListener = gameService.KeyStream.subscribe(key => this.applyKeyStroke(key));        
+
     this.constructBoard(); 
-    this.setShip(this.shipsKey[0].ship);
   }  
 
+  gameStateChanged(state: string) {
+    switch (state) {
+      case 'setup':      
+        this.setShip(this.shipsKey[0].ship);
+        break;
+      case 'in-progress':
+      this.selectedPosition = {x:0, y:0};
+      this.rows[0].squares[0].selected = true;
+      default:
+        console.log("State handler not configured for state: ", state);
+        break;
+    }
+  }
+
   applyKeyStroke(key:string) {
-    if(!this.selectedShip) return;
+    let state = this.gameService.getGameState();    
+    if(!this.selectedShip && state !== 'in-progress') return;    
+
     switch (key) {
       case 'Up':
-        this.moveShip(0, -1);
+        if(state === 'setup'){
+          this.moveShip(0, -1);
+        } else if(state === 'in-progress') {
+          this.moveTarget(0, -1);
+        }        
         break;
       case 'Down':
-        this.moveShip(0, 1);
+        if(state === 'setup'){
+          this.moveShip(0, 1);
+        } else if(state === 'in-progress') {
+          this.moveTarget(0, 1);
+        }   
         break;
       case 'Left':
-        this.moveShip(-1, 0);
+        if(state === 'setup'){
+          this.moveShip(-1, 0);
+        } else if(state === 'in-progress') {
+          this.moveTarget(-1, 0);
+        }   
         break;
       case 'Right':
-        this.moveShip(1, 0);
+        if(state === 'setup'){
+          this.moveShip(1, 0);
+        } else if(state === 'in-progress') {
+          this.moveTarget(1, 0);
+        } 
         break;
       case 'Home':
-        this.swapOrientation();   
+        if(state === 'setup'){
+          this.swapOrientation();   
+        } 
         break;
       case 'Enter':
-        this.lockShip()
+        if(state === 'setup'){
+          this.lockShip()
+        } else if(state === 'in-progress') {
+          this.fire(this.rows[this.selectedPosition.y].squares[this.selectedPosition.x]);
+        } 
         break;
       case 'End':
+        if(state === 'setup'){
         this.changeSelectedShip(-1);
+        }       
         break;
       case 'PageDown':
-        this.changeSelectedShip(1);
+        if(state === 'setup'){
+          this.changeSelectedShip(1);
+        } 
         break;
       default:
         break;
@@ -112,6 +156,21 @@ export class GridComponent {
       
       this.setShip(nextShip.ship);
     }    
+  }
+
+
+  moveTarget(x:number, y:number) {    
+    if(this.selectedPosition.x + x < 0 
+        || this.selectedPosition.x + x > 9 
+        || this.selectedPosition.y + y < 0 
+        || this.selectedPosition.y + y > 9) return;
+    
+    this.rows[this.selectedPosition.y].squares[this.selectedPosition.x].selected = false;
+
+    this.selectedPosition.x += x;
+    this.selectedPosition.y += y;
+
+    this.rows[this.selectedPosition.y].squares[this.selectedPosition.x].selected = true;        
   }
 
   lockShip() {
@@ -158,10 +217,10 @@ export class GridComponent {
       this.selectedShipKey = this.shipsKey.indexOf(nextRemainingShipKey);
       this.setShip(this.shipsKey[this.selectedShipKey].ship);    
     }  
-    else{
-      this.messageService.send(new Message('All set! Waiting for other player...'));
-      this.socketService.emit('test', {selectedShip: this.selectedShip.name});      
+    else{      
+      this.socketService.emit('setup-complete');      
       this.selectedShip = null;
+      this.constructBoard();
     }      
   }
 
@@ -261,6 +320,8 @@ export class GridComponent {
   }
 
   setShip(ship:Ship, x?:number, y?:number) {
+    if(this.gameService.getGameState() !== 'setup') return;
+
     let startingPosition = 0;
     this.selectedShip = ship;
     this.selectedShip.position = {x: 0, y: 0};
@@ -309,20 +370,27 @@ export class GridComponent {
   }
 
   dropShip(event:any){
+    if(this.gameService.getGameState() !== 'setup') return;
+
     event.preventDefault();
-    var ship = JSON.parse(event.dataTransfer.getData('ship'));
-    
-    this.gameService.setSelectedShip(ship);
+    try {
+      var ship = JSON.parse(event.dataTransfer.getData('ship'));
+      this.gameService.setSelectedShip(ship);
+    } 
+    finally {
+      console.log("Invalid item drop.")
+      return;
+    } 
   }
 
   allowShipSet(ship:any){
     ship.preventDefault();
   }
   
-  fire(square: Square, shotCount: number): number {
-    if (square.selected || !this.socketService.isTurn()) return shotCount;
+  fire(square?: Square, shotCount?: number): number {
+    if (square.locked || !this.socketService.isTurn() || this.gameService.getGameState() !== 'in-progress') return shotCount;
         
-    square.selected = true;
+    square.locked = true;
     this.socket.emit('shot-fired', square);
     this.socketService.changeTurn();
 
