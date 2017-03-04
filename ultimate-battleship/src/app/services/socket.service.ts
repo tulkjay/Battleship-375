@@ -12,8 +12,7 @@ export class SocketService{
   constructor(private messageService: MessageService, private gameService: GameService){
     this.isPlayerTurn = false;
     this.socket = io('http://localhost:3000');
-    this.socket.on("test", response => console.log("response for test: ", response))
-    this.socket.emit('test', "Hello");
+
     this.socket.on('connection-result', response => {        
       if(response.isTurn) this.setTurn(response.isTurn);        
       this.messageService.send(new Message(response.message));        

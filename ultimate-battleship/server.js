@@ -84,9 +84,10 @@ io.on('connection', socket => {
 
   //This is for testing basic socket i/o connection
   socket.on('test', data => {
-    console.log("test received, data: ", data);
-    data.newData = 'New Data';
-    socket.emit('test', data);
+    let test = {data: data};
+    test.newData = 'New Data';
+    
+    socket.emit('test', test);
   })
 })
 

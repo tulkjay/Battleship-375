@@ -1,4 +1,5 @@
 export class Message{
+
   message: string;
   active: boolean;
 
