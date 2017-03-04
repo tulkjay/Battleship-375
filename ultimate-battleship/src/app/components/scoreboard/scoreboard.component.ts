@@ -15,8 +15,7 @@ export class ScoreboardComponent {
   shipsLost: number;
   hitMissRatio: number;
   listener: any;
-  shipBuilder: ShipBuilder;
-
+  shipBuilder: ShipBuilder;  
   constructor(private gameService: GameService) {
     this.shotsFired = 14;
     this.shotsHit = 6;
@@ -24,8 +23,13 @@ export class ScoreboardComponent {
     this.shipsLost = 0;
     this.hitMissRatio = this.shotsHit/this.shotsFired;    
     this.shipBuilder = new ShipBuilder();
+    this.gameService.StateStream.subscribe(state => this.setState(state));
   }
 
+  setState(state:Array<any>) {
+    console.log("state change received: ", state);    
+  }
+  
   dragShip(event:any, shipName:string):void {
     let data = this.shipBuilder.build(shipName);
     event.dataTransfer.setData('ship', JSON.stringify(this.shipBuilder.build(shipName)));

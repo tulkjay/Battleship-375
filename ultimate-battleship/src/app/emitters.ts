@@ -1,7 +1,7 @@
 import { Subject } from 'rxjs';
 import { Message, Ship } from './models';
 
-export class KeyEmitter extends Subject<string>{
+export class KeyEmitter extends Subject<string> {
   constructor() { 
     super(); 
   }
@@ -11,7 +11,7 @@ export class KeyEmitter extends Subject<string>{
   }
 }
 
-export class MessageEmitter extends Subject<Message>{
+export class MessageEmitter extends Subject<Message> {
   constructor() { 
     super(); 
   }
@@ -21,7 +21,7 @@ export class MessageEmitter extends Subject<Message>{
   }
 }
 
-export class ShipEmitter extends Subject<Ship>{
+export class ShipEmitter extends Subject<Ship> {
   constructor() { 
     super(); 
   }
@@ -31,12 +31,22 @@ export class ShipEmitter extends Subject<Ship>{
   }
 }
 
-export class StateEmitter extends Subject<string>{
+export class GameStateEmitter extends Subject<string> {
   constructor() { 
     super(); 
   }
   
   emit(data) {
+    super.next(data);
+  }
+}
+
+export class StateEmitter extends Subject<Array<any>> {
+  constructor() {
+    super();
+  }
+
+  emit(...data){
     super.next(data);
   }
 }

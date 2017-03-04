@@ -52,7 +52,7 @@ export class GridComponent {
     this.boardKey = [];
     this.socket = this.socketService.getConnection();
     this.shipListener = gameService.ShipStream.subscribe(ship => this.setShip(ship));    
-    this.gameStateListener = gameService.StateStream.subscribe(state => this.gameStateChanged(state));    
+    this.gameStateListener = gameService.GameStateStream.subscribe(gameState => this.gameStateChanged(gameState));    
     this.keyStrokeListener = gameService.KeyStream.subscribe(key => this.applyKeyStroke(key));        
 
     this.constructBoard(); 

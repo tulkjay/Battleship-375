@@ -37,11 +37,11 @@ io.on('connection', socket => {
       gameState = STATES.setup;
 
       io.to(playerOneId).emit('connection-result', playerOneUpdate);            
-      io.to(playerOneId).emit('state-changed', gameState);            
+      io.to(playerOneId).emit('game-state-changed', gameState);            
     }    
     
     socket.emit('connection-result', connectionResult);          
-    socket.emit('state-changed', gameState);          
+    socket.emit('game-state-changed', gameState);          
   })
 
   //Game start
@@ -57,11 +57,15 @@ io.on('connection', socket => {
   })  
 
   socket.on('shot-fired', location => {
-    
+  
     //Convert to character or do whatever to let the leds know what to do.
   
     let recipientId = session.filter(player => player.id !== socket.id)[0].id;  
     io.to(recipientId).emit('shot-received', location);
+  });
+
+  socket.on('state-changed', state => {
+    console.log("state change caught on server, new state: ", state);    
   })
   
   //Game end
@@ -81,7 +85,7 @@ io.on('connection', socket => {
   //This is for testing basic socket i/o connection
   socket.on('test', data => {
     console.log("test received, data: ", data);
-    data['newData'] = 'New Data';
+    data.newData = 'New Data';
     socket.emit('test', data);
   })
 })
