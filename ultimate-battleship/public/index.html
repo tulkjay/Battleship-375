@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <title>Arduino</title>
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <h3>Red:</h3>
+        <input id="red" type="button" value="Click me!">
+
+        <h3>Green:</h3>
+        <input id="green" type="button" value="Click me!">
+
+        <h3>Blue:</h3>
+        <input id="blue" type="button" value="Click me!">
+
+        <h3>Change a specific pixel</h3>
+        <input id="pixel" type="text" min="0" max="49" value="" placeholder="Enter a number between 0 to 49">
+
+        <table>
+            <tr>
+                <th></th>
+                <th>A</th>
+                <th>B</th>
+                <th>C</th>
+                <th>D</th>
+                <th>E</th>
+            </tr>
+            <tr>
+                <th>1</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th>2</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th>3</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th>4</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            <tr>
+                <th>5</th>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        </table>
+
+        <script src="./socket.io.js"></script>
+        <script src="./client.js"></script>
+    </body>
+</html>
