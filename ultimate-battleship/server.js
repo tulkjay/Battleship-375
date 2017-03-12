@@ -1,9 +1,86 @@
+const five = require('johnny-five');
 const path = require('path');
 const express = require('express')  
-const app = express()
+const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
+var pixel = require("./pixel.js");
 const port = 3000;
+
+var opts = {};
+opts.port = process.argv[2] || "";
+
+var board = new five.Board(opts);
+var strip = null;
+const fps = 1; // how many frames per second do you want to try?
+
+board.on("ready", function() {
+
+    console.log("Board ready, lets add light");
+
+    strip = new pixel.Strip({
+        data: 11,
+        length: 50,
+        color_order: pixel.COLOR_ORDER.RGB,
+        board: this,
+        controller: "FIRMATA",
+    });
+
+    strip.on("ready", function() {
+
+        console.log("Strip ready, let's go");
+
+        var colors = ["red", "green", "blue", "yellow", "cyan", "magenta", "white"];
+        let count = 1;
+
+        strip.color("blue");
+        strip.show();
+        console.log("All done")
+    });
+
+    // io.on('connection', function(client) {
+    //     console.log("Connection successful")
+    //     client.on('join', function(handshake) {
+    //     //client.emit("test", {message: "test"});
+            
+    //         console.log(handshake);
+    //     });
+
+    //     // Set initial state
+    //     var state = {
+    //         red: 1, green: 1, blue: 1
+    //     };
+        
+        
+    //     client.on('rgb', function(data) {
+    //         console.log("data received: ", data);
+    //         // Set the new colors
+    //         if(data.position != '') {
+    //             var position = parseInt(data.position);
+    //             if(position >= 0 && position <= 49) {
+    //                 strip.pixel(position).color(data.color);
+    //                 strip.show();
+    //             } else {
+    //                 console.log("Invalid position");
+    //             }
+    //         } else {
+    //             strip.color(data.color);
+    //             strip.show();
+    //         }
+
+    //         client.emit('rgb', data);
+    //         client.broadcast.emit('rgb', data);
+    //     });
+
+    //     client.on('color', function(data) {
+    //         strip.pixel(5).color(data.color);
+    //         strip.show();
+
+    //         client.emit('color', data);
+    //         client.broadcast.emit('color', data);
+    //     })
+    // });
+});
 
 app.use(express.static(path.join(__dirname, 'server')));
 
@@ -18,9 +95,50 @@ let session = [];
 let gameState = STATES.waiting;
 
 //Socket IO pub/sub definitions
-io.on('connection', socket => {    
-  console.log("New connection, id: ", socket.id)    
+io.on('connection', socket => {
+  console.log("Connection successful")
+  
+  socket.on('join', function(handshake) {
+    socket.emit("test", {message: "test"});          
+    console.log(handshake);
+  });
 
+        // Set initial state
+  var state = {
+      red: 1, green: 1, blue: 1
+  };
+  
+        
+  socket.on('rgb', function(data) {
+    console.log("data received: ", data);
+        // Set the new colors
+        if(data.position != '') {
+            var position = parseInt(data.position);
+            if(position >= 0 && position <= 49) {
+                strip.pixel(position).color(data.color);
+                strip.show();
+            } else {
+                console.log("Invalid position");
+            }
+        } else {
+            strip.color(data.color);
+            strip.show();
+        }
+
+        socket.emit('rgb', data);
+        socket.broadcast.emit('rgb', data);
+    });
+
+    socket.on('color', function(data) {
+        strip.pixel(5).color(data.color);
+        strip.show();
+
+        socket.emit('color', data);
+        socket.broadcast.emit('color', data);
+    })
+
+  console.log("New connection, id: ", socket.id)    
+  socket.emit('rgb', {test: 'this is just a test'});
   //Game setup
   socket.on('add-player', () => {   
     let connectionResult = placePlayer(socket.id);
@@ -88,9 +206,8 @@ io.on('connection', socket => {
     test.newData = 'New Data';
     
     socket.emit('test', test);
-  })
-})
-
+  });
+});
 function placePlayer(id) {  
   if(!session.length) {
     session[0] = {
