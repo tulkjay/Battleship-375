@@ -18,7 +18,4 @@ export class MainComponent {
   onKey(event: any){
     this.gameService.sendKeyStroke(event.key.replace("Arrow", ""));
   }
-  testSocket(){
-    this.socketService.emit('rgb', {message: 'test'});
-  }
 }

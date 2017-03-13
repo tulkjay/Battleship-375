@@ -349,9 +349,14 @@ export class GridComponent {
     } while(!valid);
 
     //Set starting ship position
+    let updatedLocations = [];
+
     for(let i = startingRow; i < ship.size; i++) {
       this.rows[i].squares[startingColumn].selected = !this.rows[i].squares[startingColumn].selected;
+      updatedLocations.push({ x:i, y:startingColumn });
     }        
+
+    this.socketService.emit('update-strip', {locations: updatedLocations, color: 'green'});
     this.selectedShip.position.x = startingColumn;
     this.selectedShip.position.y = startingRow;
     this.rows[startingRow].squares[startingColumn].text = this.selectedShip.name;

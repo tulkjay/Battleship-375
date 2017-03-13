@@ -34,7 +34,7 @@ export class SocketService{
     })
   }
 
-  emit(callName:string, ...args:Array<any>) {
+  emit(callName:string, args?:any) {
     this.socket.emit(callName, args);
   }
 

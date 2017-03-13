@@ -4,85 +4,13 @@ const express = require('express')
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
-var pixel = require("./pixel.js");
+const pixel = require("./pixel.js");
 const port = 3000;
 
-var opts = {};
-opts.port = process.argv[2] || "";
-
-var board = new five.Board(opts);
-var strip = null;
-const fps = 1; // how many frames per second do you want to try?
-
-board.on("ready", function() {
-
-    console.log("Board ready, lets add light");
-
-    strip = new pixel.Strip({
-        data: 11,
-        length: 50,
-        color_order: pixel.COLOR_ORDER.RGB,
-        board: this,
-        controller: "FIRMATA",
-    });
-
-    strip.on("ready", function() {
-
-        console.log("Strip ready, let's go");
-
-        var colors = ["red", "green", "blue", "yellow", "cyan", "magenta", "white"];
-        let count = 1;
-
-        strip.color("blue");
-        strip.show();
-        console.log("All done")
-    });
-
-    // io.on('connection', function(client) {
-    //     console.log("Connection successful")
-    //     client.on('join', function(handshake) {
-    //     //client.emit("test", {message: "test"});
-            
-    //         console.log(handshake);
-    //     });
-
-    //     // Set initial state
-    //     var state = {
-    //         red: 1, green: 1, blue: 1
-    //     };
-        
-        
-    //     client.on('rgb', function(data) {
-    //         console.log("data received: ", data);
-    //         // Set the new colors
-    //         if(data.position != '') {
-    //             var position = parseInt(data.position);
-    //             if(position >= 0 && position <= 49) {
-    //                 strip.pixel(position).color(data.color);
-    //                 strip.show();
-    //             } else {
-    //                 console.log("Invalid position");
-    //             }
-    //         } else {
-    //             strip.color(data.color);
-    //             strip.show();
-    //         }
-
-    //         client.emit('rgb', data);
-    //         client.broadcast.emit('rgb', data);
-    //     });
-
-    //     client.on('color', function(data) {
-    //         strip.pixel(5).color(data.color);
-    //         strip.show();
-
-    //         client.emit('color', data);
-    //         client.broadcast.emit('color', data);
-    //     })
-    // });
-});
-
 app.use(express.static(path.join(__dirname, 'server')));
+const colors = ["red", "green", "blue"];
+let board = new five.Board();
+let strip;
 
 const STATES = {
   waiting: 'waiting', 
@@ -94,51 +22,33 @@ const STATES = {
 let session = [];
 let gameState = STATES.waiting;
 
-//Socket IO pub/sub definitions
-io.on('connection', socket => {
-  console.log("Connection successful")
-  
-  socket.on('join', function(handshake) {
-    socket.emit("test", {message: "test"});          
-    console.log(handshake);
-  });
-
-        // Set initial state
-  var state = {
-      red: 1, green: 1, blue: 1
-  };
-  
-        
-  socket.on('rgb', function(data) {
-    console.log("data received: ", data);
-        // Set the new colors
-        if(data.position != '') {
-            var position = parseInt(data.position);
-            if(position >= 0 && position <= 49) {
-                strip.pixel(position).color(data.color);
-                strip.show();
-            } else {
-                console.log("Invalid position");
-            }
-        } else {
-            strip.color(data.color);
-            strip.show();
-        }
-
-        socket.emit('rgb', data);
-        socket.broadcast.emit('rgb', data);
+board.on("ready", function() {
+    strip = new pixel.Strip({
+        data: 11,
+        length: 50,
+        color_order: pixel.COLOR_ORDER.RGB,
+        board: this,
+        controller: "FIRMATA",
     });
 
-    socket.on('color', function(data) {
-        strip.pixel(5).color(data.color);
+    strip.on("ready", function() {
+        console.log("Strip ready");
+        strip.color("blue");
         strip.show();
+    });
+});
 
-        socket.emit('color', data);
-        socket.broadcast.emit('color', data);
-    })
-
+//Socket IO pub/sub definitions
+io.on('connection', socket => {
   console.log("New connection, id: ", socket.id)    
-  socket.emit('rgb', {test: 'this is just a test'});
+      
+  //LED board setup/commands    
+  socket.on('join', () => console.log("Strip connection established."));
+
+  socket.on('update-strip', data => {
+    data.locations.forEach(location => updateStrip(location, data.color));
+  });
+
   //Game setup
   socket.on('add-player', () => {   
     let connectionResult = placePlayer(socket.id);
@@ -174,10 +84,13 @@ io.on('connection', socket => {
     }
   })  
 
+  socket.on('set-ship', updatedPositions => {
+    console.log("position: ", updatedPositions);
+  })
+
   socket.on('shot-fired', location => {
-  
-    //Convert to character or do whatever to let the leds know what to do.
-  
+    updateStrip(location, 'red')
+
     let recipientId = session.filter(player => player.id !== socket.id)[0].id;  
     io.to(recipientId).emit('shot-received', location);
   });
@@ -208,6 +121,21 @@ io.on('connection', socket => {
     socket.emit('test', test);
   });
 });
+
+function updateStrip(location, color = 'blue') {
+  let calculatedPosition = location.x * 10 + location.y;
+
+  if(calculatedPosition != '') {      
+      if(calculatedPosition >= 0 && calculatedPosition <= 49) {
+        console.log("setting position ", calculatedPosition)
+          strip.pixel(calculatedPosition).color(color);
+          strip.show();
+      } else {
+          console.log("Invalid position");
+      }
+  } 
+}
+
 function placePlayer(id) {  
   if(!session.length) {
     session[0] = {
