@@ -232,7 +232,7 @@ export class GridComponent {
     }    
   }
 
-  swapOrientation(){
+  swapOrientation() {
     if(this.orientation === 'column') {
       if(this.selectedShip.position.x <= (10 - this.selectedShip.size)) {
         for(let i = 0; i < this.selectedShip.size; i++) {
@@ -258,21 +258,33 @@ export class GridComponent {
     }
   }
 
-  removeSelectedShip(){  
+  syncBoard(locations, color:string = 'blue', command:string = 'update-strip') {
+    console.log("Syncing", locations, color, command);
+    this.socketService.emit(command, {locations: locations, color: color});        
+  }
+  
+  removeSelectedShip() {  
+    let locations = [];
     this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x].text = null;
 
     if(this.orientation === 'column') {
       for(let i = 0; i < this.selectedShip.size; i++) {
         this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].selected = false;                          
+        locations.push(this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x]);
       }
     } else if(this.orientation === 'row') {
       for(let i = 0; i < this.selectedShip.size; i++) {
         this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].selected = false;                          
+        locations.push(this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i]);
       }
     }
+
+    this.syncBoard(locations);
   }
 
   moveShip(x?:number, y?:number) {
+      let locations = [];
+
       if(this.orientation === 'column') {
         this.removeSelectedShip();
         
@@ -293,6 +305,7 @@ export class GridComponent {
 
         for(let i = 0; i < this.selectedShip.size; i++) {
           this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].selected = true;
+          locations.push(this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x])
         }
       }
       else if(this.orientation === 'row') {
@@ -315,8 +328,10 @@ export class GridComponent {
         
         for(let i = 0; i < this.selectedShip.size; i++) {
           this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].selected = true;
+          locations.push(this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i]);
         }
-      } 
+      }
+      this.syncBoard(locations, 'green'); 
   }
 
   setShip(ship:Ship, x?:number, y?:number) {
@@ -355,8 +370,7 @@ export class GridComponent {
       this.rows[i].squares[startingColumn].selected = !this.rows[i].squares[startingColumn].selected;
       updatedLocations.push({ x:i, y:startingColumn });
     }        
-
-    this.socketService.emit('update-strip', {locations: updatedLocations, color: 'green'});
+    this.syncBoard(updatedLocations, 'green', 'blink')    
     this.selectedShip.position.x = startingColumn;
     this.selectedShip.position.y = startingRow;
     this.rows[startingRow].squares[startingColumn].text = this.selectedShip.name;
