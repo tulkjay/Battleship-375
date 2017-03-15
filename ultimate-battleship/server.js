@@ -51,7 +51,7 @@ board.on("ready", function () {
         up = !up;
         done = true;
       }           
-    }, 40);              
+    }, 35);              
   });
 });
 
@@ -68,7 +68,10 @@ io.on('connection', socket => {
   })
 
   socket.on('update-strip', data => {
-    data.locations.forEach(location => updateStrip(location, data.color))
+    data.locations.forEach(location => {
+      if(location.locked) return;
+      updateStrip(location, data.color)
+    })
     setTimeout(()=>strip.show(),100 );
   });
 
@@ -129,7 +132,7 @@ io.on('connection', socket => {
   socket.on('shot-fired', location => {
     updateStrip(location, 'red')
     strip.show();
-    
+
     let recipientId = session.filter(player => player.id !== socket.id)[0].id;
     io.to(recipientId).emit('shot-received', location);
   });
@@ -189,7 +192,7 @@ function blinkStrip(location, postColor = 'green', preColor = 'blue') {
   }, 200);      
 }
 
-function updateStrip(location, color = 'blue') {
+function updateStrip(location, color = 'blue') {  
     let calculatedPosition = location.x % 2 == 0 
       ? location.x * 10 + location.y 
       : location.x * 10 + (9 - location.y);

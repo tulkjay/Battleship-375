@@ -158,7 +158,6 @@ export class GridComponent {
     }    
   }
 
-
   moveTarget(x:number, y:number) {    
     if(this.selectedPosition.x + x < 0 
         || this.selectedPosition.x + x > 9 
