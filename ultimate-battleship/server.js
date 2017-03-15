@@ -39,7 +39,7 @@ board.on("ready", function () {
         done;
 
     let boardInterval = setInterval(() => {        
-      strip.pixel(count).color(color);
+      strip.pixel(count).color(color == 'blue' ?  'blue' : count % 3 == 0 ? 'green' : 'red');
       strip.show();
 
       up ? count++ : count--;
@@ -51,7 +51,7 @@ board.on("ready", function () {
         up = !up;
         done = true;
       }           
-    }, 50);              
+    }, 40);              
   });
 });
 
@@ -67,9 +67,19 @@ io.on('connection', socket => {
     strip.show();
   })
 
-  socket.on('update-strip', data => data.locations.forEach(location => updateStrip(location, data.color)));
+  socket.on('update-strip', data => {
+    data.locations.forEach(location => updateStrip(location, data.color))
+    setTimeout(()=>strip.show(),100 );
+  });
 
-  socket.on('blink', data => data.locations.forEach(location => blinkStrip(location, data.color)))
+  socket.on('blink-strip', data => {
+    data.locations.forEach(location => updateStrip(location, data.color))
+    setTimeout(()=>strip.show(),100 );
+  });
+
+  // socket.on('blink-strip', data => data.locations.forEach(location => {
+  //   blinkStrip(location, data.color);
+  // }))
 
   //Game setup
   socket.on('add-player', () => {
@@ -118,7 +128,8 @@ io.on('connection', socket => {
 
   socket.on('shot-fired', location => {
     updateStrip(location, 'red')
-
+    strip.show();
+    
     let recipientId = session.filter(player => player.id !== socket.id)[0].id;
     io.to(recipientId).emit('shot-received', location);
   });
@@ -159,33 +170,36 @@ io.on('connection', socket => {
 });
 
 function blinkStrip(location, postColor = 'green', preColor = 'blue') {
+  let blink = true;
   let count = 0;
 
   let blinkInterval = setInterval(() => {
+    setTimeout(function() {
+      blink ? updateStrip(location, preColor)
+          : updateStrip(location, postColor);
 
-    count % 2 == 0
-    ? updateStrip(location, preColor)
-    : updateStrip(location, postColor);
-
+    strip.show();
+    blink = !blink;
     count++; 
+
     if(count == 6){
       clearInterval(blinkInterval);
     }
+    }, 10);
   }, 200);      
 }
 
 function updateStrip(location, color = 'blue') {
-  let calculatedPosition = location.x * 10 + location.y;
+    let calculatedPosition = location.x % 2 == 0 
+      ? location.x * 10 + location.y 
+      : location.x * 10 + (9 - location.y);
 
-  if (calculatedPosition != '') {
+    console.log(location, color, calculatedPosition)
     if (calculatedPosition >= 0 && calculatedPosition <= 49) {
-      console.log('setting position: ', calculatedPosition)
-      strip.pixel(calculatedPosition).color(color);
-      strip.show();
+      strip.pixel(calculatedPosition).color(color);      
     } else {
       console.log("Invalid position");
     }
-  }
 }
 
 function placePlayer(id) {

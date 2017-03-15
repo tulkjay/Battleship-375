@@ -233,13 +233,18 @@ export class GridComponent {
   }
 
   swapOrientation() {
+    let unsetLocations = [];
+    let setLocations = [];
+
     if(this.orientation === 'column') {
       if(this.selectedShip.position.x <= (10 - this.selectedShip.size)) {
         for(let i = 0; i < this.selectedShip.size; i++) {
-          this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].selected = false;                          
+          this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].selected = false;   
+          unsetLocations.push(this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x]);                        
         }
         for(let i = 0; i < this.selectedShip.size; i++) {
           this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].selected = true;
+          setLocations.push(this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i]);                        
         } 
       
         this.orientation = 'row';
@@ -248,14 +253,18 @@ export class GridComponent {
     else {
       if(this.selectedShip.position.y <= (10 - this.selectedShip.size)) {
         for(let i = 0; i < this.selectedShip.size; i++) {
-          this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].selected = false;                          
+          this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].selected = false;    
+          unsetLocations.push(this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i]);                      
         }
         for(let i = 0; i < this.selectedShip.size; i++) {
           this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].selected = true;
+          setLocations.push(this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x]);                        
         } 
         this.orientation = 'column'
       }
     }
+    this.syncBoard(unsetLocations);
+    this.syncBoard(setLocations, 'green');
   }
 
   syncBoard(locations, color:string = 'blue', command:string = 'update-strip') {
@@ -279,7 +288,8 @@ export class GridComponent {
       }
     }
 
-    this.syncBoard(locations);
+    locations.unshift({x:this.selectedShip.position.x, y: this.selectedShip.position.y});
+    this.syncBoard(locations, 'blue');
   }
 
   moveShip(x?:number, y?:number) {
@@ -331,6 +341,7 @@ export class GridComponent {
           locations.push(this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i]);
         }
       }
+
       this.syncBoard(locations, 'green'); 
   }
 
@@ -370,10 +381,12 @@ export class GridComponent {
       this.rows[i].squares[startingColumn].selected = !this.rows[i].squares[startingColumn].selected;
       updatedLocations.push({ x:i, y:startingColumn });
     }        
-    this.syncBoard(updatedLocations, 'green', 'blink')    
     this.selectedShip.position.x = startingColumn;
     this.selectedShip.position.y = startingRow;
     this.rows[startingRow].squares[startingColumn].text = this.selectedShip.name;
+    
+    updatedLocations.unshift({ y:startingRow, x:startingColumn });
+    this.syncBoard(updatedLocations, 'green', 'blink-strip')    
   }
 
   getSquareColor(square:Square) {    
@@ -388,7 +401,7 @@ export class GridComponent {
     }     
   }
 
-  dropShip(event:any){
+  dropShip(event:any) {
     if(this.gameService.getGameState() !== 'setup') return;
 
     event.preventDefault();
