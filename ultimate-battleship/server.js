@@ -59,7 +59,7 @@ board.on("ready", function () {
 io.on('connection', socket => {
   console.log("New connection, id: ", socket.id)
 
-  //LED board setup/commands    
+  //LED board setup/actions    
   socket.on('join', () => console.log("Strip connection established."));
 
   socket.on('set-strip', color => {
@@ -76,13 +76,20 @@ io.on('connection', socket => {
   });
 
   socket.on('blink-strip', data => {
-    data.locations.forEach(location => updateStrip(location, data.color))
-    setTimeout(()=>strip.show(),100 );
-  });
+    let count = 0;
 
-  // socket.on('blink-strip', data => data.locations.forEach(location => {
-  //   blinkStrip(location, data.color);
-  // }))
+    let blinkInterval = setInterval(() => {
+      data.locations.forEach(location => updateStrip(location, count%2 == 0 ? data.color : 'blue'));      
+      
+      setTimeout(()=> strip.show(), 100);
+      
+      count++; 
+
+      if(count == 5) {
+        clearInterval(blinkInterval);
+      }
+    }, 300);    
+  });
 
   //Game setup
   socket.on('add-player', () => {
@@ -177,18 +184,16 @@ function blinkStrip(location, postColor = 'green', preColor = 'blue') {
   let count = 0;
 
   let blinkInterval = setInterval(() => {
-    setTimeout(function() {
-      blink ? updateStrip(location, preColor)
+    blink ? updateStrip(location, preColor)
           : updateStrip(location, postColor);
 
     strip.show();
     blink = !blink;
     count++; 
 
-    if(count == 6){
+    if(count == 6) {
       clearInterval(blinkInterval);
     }
-    }, 10);
   }, 200);      
 }
 
