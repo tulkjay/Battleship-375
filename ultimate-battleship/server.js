@@ -9,8 +9,6 @@ const port = 3000;
 
 app.use(express.static(path.join(__dirname, 'server')));
 const colors = ["red", "green", "blue"];
-let board = new five.Board();
-let strip, boardInterval;
 
 const STATES = {
   waiting: 'waiting',
@@ -19,41 +17,10 @@ const STATES = {
   done: 'done'
 }
 
-let session = [];
-let gameState = STATES.waiting;
-
-board.on("ready", function () {
-  strip = new pixel.Strip({
-    data: 11,
-    length: 50,
-    color_order: pixel.COLOR_ORDER.RGB,
-    board: this,
-    controller: "FIRMATA",
-  });
-
-  strip.on("ready", function () {
-    console.log("Strip ready");
-    let count = 0,
-        up = true,
-        color = 'green',
-        done;
-
-    let boardInterval = setInterval(() => {        
-      strip.pixel(count).color(color == 'blue' ?  'blue' : count % 3 == 0 ? 'green' : 'red');
-      strip.show();
-
-      up ? count++ : count--;
-
-      if(count == 49 || count < 0) {            
-        if(done) clearInterval(boardInterval);
-        
-        color = 'blue';
-        up = !up;
-        done = true;
-      }           
-    }, 35);              
-  });
-});
+let boards = [],
+    strips = [],
+    session = [],
+    gameState = STATES.waiting;
 
 //Socket IO pub/sub definitions
 io.on('connection', socket => {
@@ -62,33 +29,40 @@ io.on('connection', socket => {
   //LED board setup/actions    
   socket.on('join', () => console.log("Strip connection established."));
 
-  socket.on('set-strip', color => {
-    strip.color(color);
-    strip.show();
-  })
-
   socket.on('update-strip', data => {
+    let match = strips.filter(strip => strip.id == socket.id)[0];
+    
+    if(!match || !match.strip) return;
+
+    let strip = match.strip;
+
     data.locations.forEach(location => {
-      if(location.locked) return;
-      updateStrip(location, data.color)
+      if (location.locked) return;
+
+      updateStrip(strip, location, data.color)
     })
-    setTimeout(()=>strip.show(),100 );
+    setTimeout(() => strip.show(), 100);
   });
 
   socket.on('blink-strip', data => {
     let count = 0;
+    let match = strips.filter(strip => strip.id == socket.id)[0];
+    
+    if(!match || !match.strip) return;
+
+    let strip = match.strip;
 
     let blinkInterval = setInterval(() => {
-      data.locations.forEach(location => updateStrip(location, count%2 == 0 ? data.color : 'blue'));      
-      
-      setTimeout(()=> strip.show(), 100);
-      
-      count++; 
+      data.locations.forEach(location => updateStrip(strip, location, count % 2 == 0 ? data.color : 'blue'));
 
-      if(count == 5) {
+      setTimeout(() => strip.show(), 100);
+
+      count++;
+
+      if (count == 5) {
         clearInterval(blinkInterval);
       }
-    }, 300);    
+    }, 300);
   });
 
   //Game setup
@@ -132,13 +106,12 @@ io.on('connection', socket => {
     }
   })
 
-  socket.on('set-ship', updatedPositions => {
-    console.log("position: ", updatedPositions);
-  })
-
   socket.on('shot-fired', location => {
+    let match = strips.filter(strip => strip.id == socket.id)[0];
+    if(!match || ! match.strip) return;
+
     updateStrip(location, 'red')
-    strip.show();
+    match.strip.show();
 
     let recipientId = session.filter(player => player.id !== socket.id)[0].id;
     io.to(recipientId).emit('shot-received', location);
@@ -166,6 +139,8 @@ io.on('connection', socket => {
   //This is fired on window close/refresh(client side)
   socket.on('disconnect', () => {
     session = session.filter(player => player.id !== socket.id);
+    boards = boards.filter(board => board.id !== socket.id);
+    strips = strips.filter(strip => strip.id !== socket.id);
   });
 
   //This is for testing basic socket i/o connection
@@ -184,30 +159,75 @@ function blinkStrip(location, postColor = 'green', preColor = 'blue') {
   let count = 0;
 
   let blinkInterval = setInterval(() => {
-    blink ? updateStrip(location, preColor)
+    blink ? updateStrip(location, preColor) 
           : updateStrip(location, postColor);
 
     strip.show();
-    blink = !blink;
-    count++; 
 
-    if(count == 6) {
+    blink = !blink;
+    count++;
+
+    if (count == 6) {
       clearInterval(blinkInterval);
     }
-  }, 200);      
+  }, 200);
 }
 
-function updateStrip(location, color = 'blue') {  
-    let calculatedPosition = location.x % 2 == 0 
-      ? location.x * 10 + location.y 
-      : location.x * 10 + (9 - location.y);
+function updateStrip(strip, location, color = 'blue') {
+  let calculatedPosition = location.x % 2 == 0 ?
+    location.x * 10 + location.y :
+    location.x * 10 + (9 - location.y);
 
-    console.log(location, color, calculatedPosition)
-    if (calculatedPosition >= 0 && calculatedPosition <= 49) {
-      strip.pixel(calculatedPosition).color(color);      
-    } else {
-      console.log("Invalid position");
+    console.log(location, calculatedPosition);
+
+    calculatedPosition >= 0 && calculatedPosition <= 49
+    ? strip.pixel(calculatedPosition).color(color)
+    : console.log(`Invalid position: ${calculatedPosition}(`,calculatedPosition,')');
+}
+
+function lightBoard(strip) {
+  let count = 0,
+    up = true,
+    color = 'green',
+    done;
+
+  let boardInterval = setInterval(() => {
+    strip.pixel(count).color(color == 'blue' ? 'blue' : count % 3 == 0 ? 'green' : 'red');
+    strip.show();
+
+    up ? count++ : count--;
+
+    if (count == 49 || count < 0) {
+      if (done) clearInterval(boardInterval);
+
+      color = 'blue';
+      up = !up;
+      done = true;
     }
+  }, 35);
+}
+
+function addBoard(id) {
+  boards.push(new five.Board({id: id}));  
+  
+  boards[session.length - 1].on("ready", function () {
+    strips.push({
+      id: id,
+      strip: new pixel.Strip({      
+                    data: 11,
+                    length: 50,
+                    color_order: pixel.COLOR_ORDER.RGB,
+                    board: this,
+                    controller: "FIRMATA",
+                  })
+    });
+
+    if(!strips[session.length - 1]) return;
+
+    strips[session.length - 1].strip.on("ready", function () {
+      lightBoard(strips[session.length - 1].strip);
+    });
+  });
 }
 
 function placePlayer(id) {
@@ -218,16 +238,21 @@ function placePlayer(id) {
       ready: false
     };
 
+    addBoard(id);
+
     return {
       gameReady: false,
       message: 'Waiting for other player to join...'
     };
   }
+
   session[1] = {
     id: id,
     name: 'Player 2',
     ready: false
   };
+
+  addBoard(id);
 
   return {
     gameReady: true,
