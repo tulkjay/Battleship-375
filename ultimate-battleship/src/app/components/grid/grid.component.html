@@ -2,7 +2,7 @@
   <input type="hidden">
   <div class="row" *ngFor="let row of rows">
     <div class="square"
-         [style.background-color]="getSquareColor(square)"
+         [style.background]="getSquareColor(square)"
          *ngFor="let square of row.squares"
          draggable="false"
          (click)="fire(square)">      

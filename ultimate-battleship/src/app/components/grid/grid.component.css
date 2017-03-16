@@ -12,6 +12,7 @@
 
 .square {
   background-color: darkseagreen;
+  opacity: .4;
   width: 90px;
   height: 90px;
   border: 1px solid black;

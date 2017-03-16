@@ -1,0 +1,6 @@
+#gridBackground{
+    background-image: url("../../../../resources/images/ocean.jpg");
+    background-repeat: no-repeat;
+    background-position: center; 
+    background-size: 58% 100%;
+}
