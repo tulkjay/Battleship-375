@@ -18,8 +18,9 @@ export class SocketService{
       this.messageService.send(new Message(response.message));        
     });
 
-    this.socket.on('shot-received', response => {        
-      this.changeTurn();
+    this.socket.on('shot-received', response => { 
+      console.log("shot received")       
+      this.isPlayerTurn = true;
       this.messageService.send(new Message(`Shot received at (${response.x},${response.y})`));        
     });
 
