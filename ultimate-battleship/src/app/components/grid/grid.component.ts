@@ -174,7 +174,7 @@ export class GridComponent {
 
   lockShip() {
     let valid = true;
-
+    let locations = [];
     //Check if space is occupied
     if(this.orientation === 'column') {
       for(let i = 0; i < this.selectedShip.size; i++) {        
@@ -200,14 +200,16 @@ export class GridComponent {
       for(let i = 0; i < this.selectedShip.size; i++) {
         this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x].locked = true;
         this.boardKey.push(`${this.selectedShip.position.x}${this.selectedShip.position.y + i}`)
+        locations.push(this.rows[this.selectedShip.position.y + i].squares[this.selectedShip.position.x]);
       }
     } else if(this.orientation === 'row') {
       for(let i = 0; i < this.selectedShip.size; i++) {
         this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i].locked = true;
         this.boardKey.push(`${this.selectedShip.position.x + i}${this.selectedShip.position.y}`)  
+        locations.push(this.rows[this.selectedShip.position.y].squares[this.selectedShip.position.x + i]);        
       }
     }
-
+    this.syncBoard(locations, 'green', 'blink-strip');
     this.shipsKey[this.selectedShipKey].isLocked = true;
 
     //Move to the next available ship   
@@ -263,7 +265,7 @@ export class GridComponent {
       }
     }
     this.syncBoard(unsetLocations);
-    this.syncBoard(setLocations, 'green');
+    this.syncBoard(setLocations, 'red');
   }
 
   syncBoard(locations, color:string = 'blue', command:string = 'update-strip') {
@@ -341,7 +343,7 @@ export class GridComponent {
         }
       }
 
-      this.syncBoard(locations, 'green'); 
+      this.syncBoard(locations, 'red'); 
   }
 
   setShip(ship:Ship, x?:number, y?:number) {
@@ -385,7 +387,7 @@ export class GridComponent {
     this.rows[startingRow].squares[startingColumn].text = this.selectedShip.name;
     
     updatedLocations.unshift({ y:startingRow, x:startingColumn });
-    this.syncBoard(updatedLocations, 'green', 'blink-strip')    
+    this.syncBoard(updatedLocations, 'red', 'blink-strip')    
   }
 
   getSquareColor(square:Square) {    
@@ -423,7 +425,7 @@ export class GridComponent {
         
     square.locked = true;
     this.socket.emit('shot-fired', square);
-    this.socketService.changeTurn();
+    this.socketService.setTurn(false);
 
     return shotCount++;
   }

@@ -107,14 +107,21 @@ io.on('connection', socket => {
   })
 
   socket.on('shot-fired', location => {
-    let match = strips.filter(strip => strip.id == socket.id)[0];
-    if(!match || ! match.strip) return;
-
-    updateStrip(location, 'red')
-    match.strip.show();
-
+    console.log("shot fired", location);
     let recipientId = session.filter(player => player.id !== socket.id)[0].id;
     io.to(recipientId).emit('shot-received', location);
+
+    let match = strips.filter(strip => strip.id != socket.id)[0];
+    console.log("no match: ", !match || !match.strip);
+    
+    if(!match || ! match.strip) return;
+    
+    console.log("updating")
+    
+    updateStrip(match.strip, location, 'red')
+    
+    match.strip.show();
+
   });
 
   socket.on('state-changed', state => {
@@ -138,9 +145,21 @@ io.on('connection', socket => {
 
   //This is fired on window close/refresh(client side)
   socket.on('disconnect', () => {
-    session = session.filter(player => player.id !== socket.id);
-    boards = boards.filter(board => board.id !== socket.id);
-    strips = strips.filter(strip => strip.id !== socket.id);
+    let board = boards.filter(board => board.id === socket.id)[0];
+
+    if(board) {
+      console.log('Resetting board id');
+      board.id = -1;
+    }
+
+    let strip = strips.filter(strip => strip.id === socket.id)[0];
+    
+    if(strip) {
+      console.log('Resetting strip id');
+      strip.id = -1;
+    }
+
+    session = session.filter(player => player.id !== socket.id);        
   });
 
   //This is for testing basic socket i/o connection
@@ -178,9 +197,7 @@ function updateStrip(strip, location, color = 'blue') {
     location.x * 10 + location.y :
     location.x * 10 + (9 - location.y);
 
-    console.log(location, calculatedPosition);
-
-    calculatedPosition >= 0 && calculatedPosition <= 49
+    calculatedPosition >= 0 && calculatedPosition <= 99
     ? strip.pixel(calculatedPosition).color(color)
     : console.log(`Invalid position: ${calculatedPosition}(`,calculatedPosition,')');
 }
@@ -197,17 +214,38 @@ function lightBoard(strip) {
 
     up ? count++ : count--;
 
-    if (count == 49 || count < 0) {
+    if (count == 99 || count < 0) {
       if (done) clearInterval(boardInterval);
 
       color = 'blue';
       up = !up;
       done = true;
     }
-  }, 35);
+  }, 15);
+}
+
+function resetStrip(id, color = 'blue') {
+  let match = strips.filter(strip => strip.id === id)[0];
+  
+  match.strip.color(color);
+  match.strip.show();
 }
 
 function addBoard(id) {
+  let initializedBoard = boards.filter(board => board.id === -1)[0];
+  
+  if(initializedBoard) {
+    console.log("Reassigning board id")
+    initializedBoard.id = id;
+    let strip = strips.filter(strip => strip.id === -1)[0];    
+    if(strip) {
+      console.log("Reassigning strip id")
+      strip.id = id;
+      resetStrip(id);
+    }    
+    return;
+  }
+
   boards.push(new five.Board({id: id}));  
   
   boards[session.length - 1].on("ready", function () {
@@ -215,7 +253,7 @@ function addBoard(id) {
       id: id,
       strip: new pixel.Strip({      
                     data: 11,
-                    length: 50,
+                    length: 100,
                     color_order: pixel.COLOR_ORDER.RGB,
                     board: this,
                     controller: "FIRMATA",
@@ -227,6 +265,10 @@ function addBoard(id) {
     strips[session.length - 1].strip.on("ready", function () {
       lightBoard(strips[session.length - 1].strip);
     });
+
+    this.on('exit', function() {
+      console.log("exiting");
+    })
   });
 }
 
