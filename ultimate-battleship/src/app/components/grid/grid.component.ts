@@ -398,7 +398,7 @@ export class GridComponent {
       return 'red'
     }
     else {
-      return 'cornflower'
+      return 'cornflowerblue'
     }     
   }
 

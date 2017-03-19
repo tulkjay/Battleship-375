@@ -280,7 +280,7 @@ function placePlayer(id) {
       ready: false
     };
 
-   // addBoard(id);
+    addBoard(id);
 
     return {
       gameReady: false,
@@ -294,7 +294,7 @@ function placePlayer(id) {
     ready: false
   };
 
-  //addBoard(id);
+  addBoard(id);
 
   return {
     gameReady: true,
