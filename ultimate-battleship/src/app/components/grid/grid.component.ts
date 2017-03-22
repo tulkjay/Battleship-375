@@ -289,7 +289,7 @@ export class GridComponent {
       }
     }
 
-    locations.unshift({x:this.selectedShip.position.x, y: this.selectedShip.position.y});
+    //locations.unshift({x:this.selectedShip.position.y, y: this.selectedShip.position.x});
     this.syncBoard(locations, 'blue');
   }
 
@@ -386,7 +386,7 @@ export class GridComponent {
     this.selectedShip.position.y = startingRow;
     this.rows[startingRow].squares[startingColumn].text = this.selectedShip.name;
     
-    updatedLocations.unshift({ y:startingRow, x:startingColumn });
+    updatedLocations.unshift({ y:startingColumn, x:startingRow });
     this.syncBoard(updatedLocations, 'red', 'blink-strip')    
   }
 
