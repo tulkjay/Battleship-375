@@ -387,7 +387,7 @@ export class GridComponent {
     this.rows[startingRow].squares[startingColumn].text = this.selectedShip.name;
     
     updatedLocations.unshift({ y:startingColumn, x:startingRow });
-    this.syncBoard(updatedLocations, 'red', 'blink-strip')    
+    this.syncBoard(updatedLocations, 'red', 'update-strip')    
   }
 
   getSquareColor(square:Square) {    
