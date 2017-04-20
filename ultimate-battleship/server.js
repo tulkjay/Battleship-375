@@ -89,9 +89,12 @@ io.on('connection', socket => {
   })
 
   //Game start
-  socket.on('setup-complete', () => {
+  socket.on('setup-complete', playerBoard => {
+    console.log("On setup complete: ", playerBoard);
+
     let player = session.find(player => player.id === socket.id);
     player.ready = true;
+    player.shipsKey = playerBoard;
 
     if (session[0].ready && session[1].ready) {
       io.emit('game-ready', {
@@ -108,10 +111,34 @@ io.on('connection', socket => {
 
   socket.on('shot-fired', location => {
     console.log("shot fired", location);
-    let recipientId = session.filter(player => player.id !== socket.id)[0].id;
-    io.to(recipientId).emit('shot-received', location);
+    let recipient = session.filter(player => player.id !== socket.id)[0];
+    
+    if(recipient.shipsKey.find(x => x ==`${location.y}${location.x}`)) {
+      console.log("Shot Made Contact!", location);
 
-    let match = strips.filter(strip => strip.id != socket.id)[0];
+      recipient.shipsKey.splice(recipient.shipsKey.indexOf(`${location.y}${location.x}`), 1);
+
+      if(!recipient.shipsKey.length){
+        console.log("Game over");
+        let winnerId = session.filter(player => player.id !== socket.id)[0].id;
+
+        socket.emit('game-end', {
+          state: STATES.done,
+          message: 'You have lost the battle...'
+        });
+
+        io.to(winnerId).emit('game-end', {
+          state: STATES.done,
+          message: 'You have won the battle!!!'
+        });
+      }
+    }else{
+      console.log("No contact", location);
+    }
+
+    io.to(recipient.id).emit('shot-received', location);
+
+    let match = strips.filter(strip => strip.id !== socket.id)[0];
     console.log("no match: ", !match || !match.strip);
     
     if(!match || ! match.strip) return;
@@ -126,21 +153,6 @@ io.on('connection', socket => {
 
   socket.on('state-changed', state => {
     console.log("state change caught on server, new state: ", state);
-  })
-
-  //Game end
-  socket.on('game-lost', () => {
-    let winnerId = session.filter(player => player.id !== socket.id)[0].id;
-
-    socket.emit('game-end', {
-      state: STATES.done,
-      message: 'You have lost the battle...'
-    });
-
-    io.to(winnerId).emit('game-end', {
-      state: STATES.done,
-      message: 'You have won the battle!!!'
-    });
   })
 
   //This is fired on window close/refresh(client side)
@@ -277,6 +289,7 @@ function placePlayer(id) {
     session[0] = {
       id: id,
       name: 'Player 1',
+      shipsKey: [],
       ready: false
     };
 
@@ -291,6 +304,7 @@ function placePlayer(id) {
   session[1] = {
     id: id,
     name: 'Player 2',
+    shipsKey: [],
     ready: false
   };
 

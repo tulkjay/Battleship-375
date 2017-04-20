@@ -33,6 +33,12 @@ export class SocketService{
       this.gameService.setGameState(response.state);
       this.messageService.send(new Message(response.message));
     })
+    
+    this.socket.on('game-end', response => {
+      console.log("response received: ", response)
+      this.gameService.setGameState(response.state);
+      this.messageService.send(new Message(response.message));
+    })
   }
 
   emit(callName:string, args?:any) {

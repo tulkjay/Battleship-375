@@ -219,7 +219,7 @@ export class GridComponent {
       this.setShip(this.shipsKey[this.selectedShipKey].ship);    
     }  
     else{      
-      this.socketService.emit('setup-complete');      
+      this.socketService.emit('setup-complete', this.boardKey);      
       this.selectedShip = null;
       this.constructBoard();
     }      
