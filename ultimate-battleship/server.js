@@ -112,10 +112,10 @@ io.on('connection', socket => {
   socket.on('shot-fired', location => {
     console.log("shot fired", location);
     let recipient = session.filter(player => player.id !== socket.id)[0];
-    
+    let hit;
     if(recipient.shipsKey.find(x => x ==`${location.y}${location.x}`)) {
       console.log("Shot Made Contact!", location);
-
+      hit = true;
       recipient.shipsKey.splice(recipient.shipsKey.indexOf(`${location.y}${location.x}`), 1);
 
       if(!recipient.shipsKey.length){
@@ -133,7 +133,7 @@ io.on('connection', socket => {
         });
       }
     }else{
-      console.log("No contact", location);
+      console.log("No contact", location);      
     }
 
     io.to(recipient.id).emit('shot-received', location);
@@ -141,11 +141,11 @@ io.on('connection', socket => {
     let match = strips.filter(strip => strip.id !== socket.id)[0];
     console.log("no match: ", !match || !match.strip);
     
-    if(!match || ! match.strip) return;
+    if(!match || !match.strip) return;
     
     console.log("updating")
     
-    updateStrip(match.strip, location, 'red')
+    blinkPoint(match.strip, location, hit ? 'red' : 'orange', hit ? 'green' : 'blue');
     
     match.strip.show();
 
@@ -185,23 +185,19 @@ io.on('connection', socket => {
   });
 });
 
-function blinkStrip(location, postColor = 'green', preColor = 'blue') {
-  let blink = true;
-  let count = 0;
+function blinkPoint(strip, location, postColor = 'green', preColor = 'blue') {
+    let count = 0;
+    let blinkInterval = setInterval(() => {
+      updateStrip(strip, location, count % 2 == 0 ? postColor : preColor);
 
-  let blinkInterval = setInterval(() => {
-    blink ? updateStrip(location, preColor) 
-          : updateStrip(location, postColor);
+      setTimeout(() => strip.show(), 100);
 
-    strip.show();
+      count++;
 
-    blink = !blink;
-    count++;
-
-    if (count == 6) {
-      clearInterval(blinkInterval);
-    }
-  }, 200);
+      if (count == 5) {
+        clearInterval(blinkInterval);
+      }
+    }, 300);
 }
 
 function updateStrip(strip, location, color = 'blue') {

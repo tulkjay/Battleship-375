@@ -64,8 +64,10 @@ export class GridComponent {
         this.setShip(this.shipsKey[0].ship);
         break;
       case 'in-progress':
-      this.selectedPosition = {x:0, y:0};
-      this.rows[0].squares[0].selected = true;
+        this.selectedPosition = {x:0, y:0};
+        this.rows[0].squares[0].selected = true;
+      case 'done':
+        break;
       default:
         console.log("State handler not configured for state: ", state);
         break;
@@ -125,7 +127,7 @@ export class GridComponent {
       case 'PageDown':
         if(state === 'setup'){
           this.changeSelectedShip(1);
-        } 
+        }
         break;
       default:
         break;
