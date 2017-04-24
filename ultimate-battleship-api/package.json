@@ -1,0 +1,39 @@
+{
+  "name": "ultimate-battleship-api",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tulkjay/Battleship-375.git"
+  },
+  "author": "Jay Tulk",
+  "bugs": {
+    "url": "https://github.com/tulkjay/Battleship-375/issues"
+  },
+  "homepage": "https://github.com/tulkjay/Battleship-375#readme",
+  "dependencies": {
+    "bootstrap": "^4.0.0-alpha.6",
+    "core-js": "^2.4.1",
+    "express": "^4.14.1",
+    "johnny-five": "^0.9.62",
+    "node-pixel": "^0.9.1",
+    "nodemon": "^1.11.0",
+    "path": "^0.12.7",
+    "socket.io": "^1.7.2",
+    "socket.io-client": "^1.7.2"
+  },
+  "devDependencies": {
+    "jasmine-core": "2.5.2",
+    "jasmine-spec-reporter": "2.5.0",
+    "karma": "1.2.0",
+    "karma-chrome-launcher": "^2.0.0",
+    "karma-cli": "^1.0.1",
+    "karma-jasmine": "^1.0.2",
+    "karma-remap-istanbul": "^0.2.1",
+    "protractor": "~4.0.13"
+  }
+}

@@ -19,8 +19,10 @@
         Destroyer
          <img src="../../../../resources/images/destroyer.png" height="50%" width="20%">
     </div>
-    <div>Shots Fired: {{shotsFired}}</div>    
-    <div>Ships Sunk: {{shipsSunk}}</div>
-    <div>Ships Lost: {{shipsLost}}</div>
-    <div>Shots on Target: {{hitMissRatio | percent:'1.2-2'}}</div>
+    <div class="stat-box">
+    <div class="stat">Shots Fired: {{shotsFired}}</div>    
+        <div class="stat">Ships Sunk: {{shipsSunk}}</div>
+        <div class="stat">Ships Lost: {{shipsLost}}</div>
+        <div class="stat">Shots on Target: {{hitMissRatio | percent:'1.2-2'}}</div>
+    </div>    
 </div>

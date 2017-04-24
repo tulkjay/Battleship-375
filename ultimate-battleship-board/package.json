@@ -1,0 +1,28 @@
+{
+  "name": "ultimate-battleship-board",
+  "version": "1.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon board-control.js"
+  },
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tulkjay/Battleship-375.git"
+  },
+  "author": "Jay Tulk",
+  "bugs": {
+    "url": "https://github.com/tulkjay/Battleship-375/issues"
+  },
+  "homepage": "https://github.com/tulkjay/Battleship-375#readme",
+  "dependencies": {
+    "express": "^4.14.1",
+    "johnny-five": "^0.9.62",
+    "node-pixel": "^0.9.1",
+    "nodemon": "^1.11.0",
+    "path": "^0.12.7",
+    "socket.io": "^1.7.2",
+    "socket.io-client": "^1.7.2",
+    "zone.js": "^0.7.2"
+  }
+}
