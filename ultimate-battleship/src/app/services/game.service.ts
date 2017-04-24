@@ -22,15 +22,15 @@ import { Ship } from '../models';
     this.gameState = 'waiting';        
    }
    
-   setGameState(gameState:string) {
+   setGameState(gameState: string) {
     if(this.gameState !== gameState) {
       this.gameState = gameState;
       console.log("The game's state has been set to: ", this.gameState);
-      this.GameStateStream.emit(this.gameState)
+      this.GameStateStream.emit(this.gameState)      
     }    
    }
 
-   updateState(state:Array<any>) {
+   updateState(state: Array<any>) {
      console.log("The state is now: ", state);
      this.StateStream.emit(state);
    }
@@ -50,5 +50,5 @@ import { Ship } from '../models';
    setSelectedShip(ship:Ship) {
      this.selectedShip = ship;
      this.sendShip(this.selectedShip);
-   }
+   }   
  }

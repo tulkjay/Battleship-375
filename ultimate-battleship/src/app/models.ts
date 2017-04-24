@@ -2,10 +2,12 @@ export class Message{
 
   message: string;
   active: boolean;
-
-  constructor(text?: string){
+  timeout: number;
+  
+  constructor(text?: string, timeout: number = 4000){
     this.message = text;
     this.active = true;
+    this.timeout = timeout;
   }
 }
 

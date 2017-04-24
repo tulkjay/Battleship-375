@@ -2,28 +2,10 @@
   position: fixed;
   bottom: 50px;
   right: 15px;
-  width: 500px;
-  height: 85vh;
-  padding: 50px 50px 50px 50px;
+  padding: 20px 10px 20px 10px;
   border: 3px solid lightcoral;
-  background-color: black;
-}
-
-.ship {
-  padding: 10px 20px;
-  margin: 25px;
-  border: 1px solid blue;
-  border-radius: 5px;
-  background-color: lightblue;
-  color: black;
-  transition: margin-left 0.3s;
-  font-size: 1.5em;
-}
-
-.ship:hover {
-  background-color: darkslategray;
-  color: lightblue;  
-  margin-left: 10px;  
+  background-color: gray;
+  border-radius: 25px;
 }
 
 .stat-box{

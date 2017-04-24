@@ -11,7 +11,7 @@ import { Message } from '../models';
     this.Stream = new MessageEmitter();
    }
 
-   send(message:Message) {
+   send(message: Message) {
      this.Stream.emit(message);
    }
  }

@@ -1,8 +1,29 @@
-<div class="scoreboard">
-    <div class="stat-box">
-    <div class="stat">Shots Fired: {{shotsFired}}</div>    
-        <div class="stat">Ships Sunk: {{shipsSunk}}</div>
-        <div class="stat">Ships Lost: {{shipsLost}}</div>
-        <div class="stat">Shots on Target: {{hitMissRatio | percent:'1.2-2'}}</div>
-    </div>    
+<div class="helpboard">      
+        <div class="ship" title="The carrier takes 5 spaces">
+        Carrier
+            <img src="../../../../resources/images/carrier.png" height="50%" width="80%">
+    </div>
+    <div class="ship" title="The battleship takes 4 spaces">
+        Battleship
+        <img src="../../../../resources/images/battleship.png" height="50%" width="60%">
+    </div>
+    <div class="ship" title="The cruiser takes 3 spaces">
+        Cruiser
+         <img src="../../../../resources/images/cruiser.png" height="50%" width="40%">
+    </div>
+    <div class="ship" title="The submarine takes 3 spaces">
+        Submarine
+          <img src="../../../../resources/images/sub.png" height="50%" width="40%">
+    </div>
+    <div class="ship" title="The destroyer takes 2 spaces">
+        Destroyer
+         <img src="../../../../resources/images/destroyer.png" height="50%" width="20%">
+    </div>
+    <div class="controls">
+        <p>Move: Arrow Keys</p>
+        <p>Flip Ship: Home</p>
+        <p>Previous Ship: End</p>
+        <p>Next Ship: Page Down</p>
+        <p>Fire: Enter</p>        
+    </div>
 </div>

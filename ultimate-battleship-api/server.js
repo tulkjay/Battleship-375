@@ -4,7 +4,6 @@ const express = require('express')
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server);
-//const pixel = require("./pixel.js");
 const port = 3000;
 
 app.use(express.static(path.join(__dirname, 'server')));
@@ -82,8 +81,6 @@ io.on('connection', socket => {
 
   //Game start
   socket.on('setup-complete', playerBoard => {
-    console.log("On setup complete: ", playerBoard);
-
     let player = session.find(player => player.id === socket.id);
     player.ready = true;
     player.shipsKey = playerBoard;
@@ -102,43 +99,43 @@ io.on('connection', socket => {
   })
 
   socket.on('shot-fired', location => {
-    console.log("shot fired", location);
     let recipient = session.filter(player => player.id !== socket.id)[0];
-    let hit;
+    let hit = false;
 
     if(recipient.shipsKey.find(x => x ==`${location.y}${location.x}`)) {
-      console.log("Shot Made Contact!", location);
       hit = true;
       recipient.shipsKey.splice(recipient.shipsKey.indexOf(`${location.y}${location.x}`), 1);
 
       if(!recipient.shipsKey.length){
         console.log("Game over");
-        let winnerId = session.filter(player => player.id !== socket.id)[0].id;
+        let loserId = session.filter(player => player.id !== socket.id)[0].id;
 
         socket.emit('game-end', {
           state: STATES.done,
-          message: 'You have lost the battle...'
+          message: 'You have won the battle!!!',
+          won: true
         });
 
-        io.to(winnerId).emit('game-end', {
+        io.to(loserId).emit('game-end', {
           state: STATES.done,
-          message: 'You have won the battle!!!'
+          message: 'You have lost the battle...',
+          won: false
         });
       }
-    }else{
-      console.log("No contact", location);      
     }
 
-    io.to(recipient.id).emit('shot-received', location);
+    //Return results of shot
+    io.to(socket.id).emit('shot-result', {success: hit});
 
-    let player = session.filter(player => player.id !== socket.id)[0];    
+    io.to(recipient.id).emit('shot-received', hit);    
     
-    if(!player || !player.boardId) return;
+    if(!recipient.boardId) return;
     
-    io.to(player.boardId).emit('board-blink-point', { location: location, postColor: hit ? 'red' : 'orange', preColor: hit ? 'green' : 'blue');
-    
-    
-
+    io.to(recipient.boardId).emit('board-blink-point', { 
+      location, 
+      postColor: hit ? 'red' : 'orange', 
+      preColor: hit ? 'green' : 'blue'
+    });
   });
 
   socket.on('state-changed', state => {
@@ -147,8 +144,8 @@ io.on('connection', socket => {
 
   //This is fired on window close/refresh(client side)
   socket.on('disconnect', () => {
-//Check for repercussions
 
+    //Check for repercussions
     // let board = boards.filter(board => board.id === socket.id)[0];
 
     // if(board) {
@@ -179,9 +176,6 @@ io.on('connection', socket => {
 
 function placePlayer(id) {
   if (!session.length) {
-    console.log("I would assign a board here");
-    //boardId = getBoardConnection(id);
-
     session[0] = {
       id: id,
       name: 'Player 1',
@@ -189,8 +183,6 @@ function placePlayer(id) {
       ready: false,   
       boardId: boards[0]    
     };
-
-    //addBoard(id);
 
     return {
       gameReady: false,
@@ -205,8 +197,6 @@ function placePlayer(id) {
     ready: false, 
     boardId: boards[1]
   };
-
-  addBoard(id);
 
   return {
     gameReady: true,

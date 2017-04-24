@@ -58,15 +58,16 @@ export class GridComponent {
     this.constructBoard(); 
   }  
 
-  gameStateChanged(state: string) {
+  gameStateChanged(state: string) {    
     switch (state) {
       case 'setup':      
         this.setShip(this.shipsKey[0].ship);
         break;
       case 'in-progress':
         this.selectedPosition = {x:0, y:0};
-        this.rows[0].squares[0].selected = true;
+        this.rows[0].squares[0].selected = true;      
       case 'done':
+        console.log("Time to lock everything down")
         break;
       default:
         console.log("State handler not configured for state: ", state);
@@ -271,7 +272,6 @@ export class GridComponent {
   }
 
   syncBoard(locations, color:string = 'blue', command:string = 'update-strip') {
-    console.log("Syncing", locations, color, command);
     this.socketService.emit(command, {locations: locations, color: color});        
   }
   

@@ -17,7 +17,7 @@ const STATES = {
   done: 'done'
 }
 
-let board;
+let board, stripHandler;
 let socket = require('socket.io-client')(hostUrl);
 
   socket.on('connect', function() {
@@ -39,16 +39,13 @@ let socket = require('socket.io-client')(hostUrl);
   
     socket.on('board-blink-strip', data => {
       let count = 0;
-      let match = strips.filter(strip => strip.id == socket.id)[0];
       
-      if(!match || !match.strip) return;
-
-      let strip = match.strip;
+      if(!stripHandler.strip) return;      
 
       let blinkInterval = setInterval(() => {
-        data.locations.forEach(location => updateStrip(strip, location, count % 2 == 0 ? data.color : 'blue'));
+        data.locations.forEach(location => updateStrip(location, count % 2 == 0 ? data.color : 'blue'));
 
-        setTimeout(() => strip.show(), 100);
+        setTimeout(() => stripHandler.strip.show(), 100);
 
         count++;
 
@@ -82,14 +79,11 @@ let socket = require('socket.io-client')(hostUrl);
   
 function registerBoard() {
   console.log("Adding board", socket.id);
-    
-  stripHandler.id = socket.id;
-  resetStrip(id);    
-  
-  let board = new five.Board({id: socket.id});
+
+  board = new five.Board({id: socket.id});
   
   board.on("ready", function () {
-    console.log("board ready")
+    console.log("board ready, attempting to connect to player")
     socket.emit("connect-board");
     stripHandler = {
       id: socket.id,
@@ -160,6 +154,7 @@ function lightBoard() {
   }, 15);
 }
 
+//Obsolete
 function addBoard() {
   console.log("Adding board", socket.id);    
   

@@ -1,12 +1,14 @@
-.scoreboard {
+.helpboard {
   position: fixed;
   bottom: 50px;
   left: 5px;
   width: 500px;
-  height: 85vh;
+  height: 70%;
   padding: 50px 50px 50px 50px;
   border: 3px solid lightcoral;
-  background-color: black;
+  background-color: gray;
+  border-radius: 25px;
+  font-family: monospace;
 }
 
 .ship {
@@ -23,17 +25,14 @@
 .ship:hover {
   background-color: darkslategray;
   color: lightblue;  
-  margin-left: 10px;  
+  margin-left: 5px;  
 }
 
-.stat-box{
-  margin: 60px 20px 40px 20px;
-  padding: 35px;
-}
-
-.stat {
+.controls {
   background-color: lightgray;
-  font-size: 3em;
-  font-family: monospace;
-  padding: 20px 30px;
+  padding: 0px 10px;
+  margin-top: 90px;
+  border: 2px solid lightgray;
+  font-size: 2.5em;
+  border-radius: 10px;
 }
