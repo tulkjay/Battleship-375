@@ -17,6 +17,7 @@
   "homepage": "https://github.com/tulkjay/Battleship-375#readme",
   "dependencies": {
     "express": "^4.14.1",
+    "firmata": "^0.16.0",
     "johnny-five": "^0.9.62",
     "node-pixel": "^0.9.1",
     "nodemon": "^1.11.0",

@@ -16,6 +16,8 @@ export class MainComponent {
   constructor(private gameService: GameService, private socketService: SocketService){}
 
   onKey(event: any){
+    var audio = new Audio('../../../assets/klick.wav');
+    audio.play();
     this.gameService.sendKeyStroke(event.key.replace("Arrow", ""));
   }
 }

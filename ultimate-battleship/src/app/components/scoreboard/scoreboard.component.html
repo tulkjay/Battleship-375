@@ -1,9 +1,9 @@
 <div class="scoreboard">
     <div class="stat-box">
-        <div class="stat" [style.background]="getStateBackgroundColor()">{{stateMessage}}</div>
-        <div class="stat">Shots Fired: {{shotsFired}}</div>    
-        <div class="stat">Shots Hit: {{shotsHit}}</div>    
-        <div class="stat">Shots Missed: {{shotsMissed}}</div>    
-        <div class="stat">Shots on Target: {{hitMissRatio | percent:'1.2-2'}}</div>
+        <p class="state-message" [style.background]="getStateBackgroundColor()">{{stateMessage}}</p>
+        <p>Shots Fired: {{shotsFired}}</p>    
+        <p>Shots Hit: {{shotsHit}}</p>    
+        <p>Shots Missed: {{shotsMissed}}</p>    
+        <p>Shots on Target: {{hitMissRatio | percent:'1.2-2'}}</p>
     </div>    
 </div>

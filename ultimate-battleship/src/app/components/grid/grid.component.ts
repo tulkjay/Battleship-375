@@ -424,7 +424,10 @@ export class GridComponent {
   
   fire(square?: Square, shotCount?: number): number {
     if (square.locked || !this.socketService.isTurn() || this.gameService.getGameState() !== 'in-progress') return shotCount;
-        
+    
+    var audio = new Audio('../../../assets/missileLaunch.wav');
+    audio.play();
+
     square.locked = true;
     this.socket.emit('shot-fired', square);
     this.socketService.setTurn(false);

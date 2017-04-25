@@ -24,10 +24,6 @@ let socket = require('socket.io-client')(hostUrl);
     console.log("Socket connected!", socket.id);    
     registerBoard(socket.id);
 
-    socket.on("test", data => {
-      console.log("Test was called: ", data);
-    })
-
     socket.on('board-update-strip', data => {
       data.locations.forEach(location => {
         if (location.locked) return;
@@ -54,6 +50,11 @@ let socket = require('socket.io-client')(hostUrl);
         }
       }, 300);
     });
+    
+    socket.on('board-reset', () => {
+      console.log("Resetting board");
+      resetStrip();
+    })
 
     socket.on('board-blink-point', data => {
       let count = 0;

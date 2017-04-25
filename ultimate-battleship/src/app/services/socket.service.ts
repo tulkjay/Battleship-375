@@ -23,7 +23,11 @@ export class SocketService{
     this.socket.on('shot-received', hit => {       
       this.isPlayerTurn = true;   
       console.log("hit received", hit)         
-      if(hit) this.messageService.send(new Message("You've been hit!"));        
+      if(hit) {
+        this.messageService.send(new Message("You've been hit!"));        
+        var audio = new Audio('../../../assets/shotReceived.wav');
+        audio.play();
+      }
       console.log("hit calcs", hit)
     });
 

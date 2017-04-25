@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
 import { GameService } from '../../services/game.service';
 import { SocketService } from '../../services/socket.service';
+import { MessageService } from '../../services/message.service';
 import { ShipCatalog } from '../../helpers/ShipCatalog';
+import { Message } from '../../models';
 
 @Component({
   selector:'scoreboard', 
@@ -19,14 +21,14 @@ export class ScoreboardComponent {
   stateMessage: string;
   selectedShip: string;
 
-  constructor(private gameService: GameService, private socketService : SocketService) {
+  constructor(private gameService: GameService, private socketService : SocketService, private messageService: MessageService) {
     this.shotsFired = 0;
     this.shotsHit = 0;
     this.shotsMissed = 0;
     this.hitMissRatio = this.shotsFired > 0 ? this.shotsHit/this.shotsFired : 0;    
 
     this.gameService.GameStateStream.subscribe(state => this.setGameState(state));
-    this.gameService.StateStream.subscribe(state => this.updateStats(state));    
+    this.gameService.StateStream.subscribe(state => this.updateStats(state));        
   }
 
   getStateBackgroundColor() {
@@ -53,13 +55,14 @@ export class ScoreboardComponent {
     this.state = newState;       
   }
 
-  updateStats(success: Object) {
-    console.log("state: ", success[0])
+  updateStats(success: Object) {    
     this.shotsFired++;
     
     if(success[0]) {
+      this.messageService.send(new Message("Shot on target!", 3000));
       this.shotsHit++;
     } else {
+      this.messageService.send(new Message("Shot missed", 3000));      
       this.shotsMissed++;
     }
     this.hitMissRatio = this.shotsHit/this.shotsFired;

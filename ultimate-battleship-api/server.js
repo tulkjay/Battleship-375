@@ -45,13 +45,11 @@ io.on('connection', socket => {
 
   //Board connections
   socket.on('connect-board', () => {
-      boards.push(socket.id)
-      
-      if (session.length > 1) {
-        session.boardId = socket.id;
-      }
-
-      console.log("Boards are now: ", boards, "session is now: ", session)
+    if(boards.length){
+      boards[1] = socket.id;
+    } else{
+      boards[0] = socket.id;
+    }
   });
 
   //Game setup
@@ -76,7 +74,6 @@ io.on('connection', socket => {
 
     socket.emit('connection-result', connectionResult);
     socket.emit('game-state-changed', gameState);
-    console.log("Session is now: ", session)
   })
 
   //Game start
@@ -144,38 +141,19 @@ io.on('connection', socket => {
 
   //This is fired on window close/refresh(client side)
   socket.on('disconnect', () => {
-
-    //Check for repercussions
-    // let board = boards.filter(board => board.id === socket.id)[0];
-
-    // if(board) {
-    //   console.log('Resetting board id');
-    //   board.id = -1;
-    // }
-
-    // let strip = strips.filter(strip => strip.id === socket.id)[0];
+    console.log("Session", session)
+    let leavingPlayer = session.filter(player => player.id == socket.id);        
+    console.log("Disconnecting", leavingPlayer)
+    leavingPlayer.id = null;
     
-    // if(strip) {
-    //   console.log('Resetting strip id');
-    //   strip.id = -1;
-    // }
-
-    session = session.filter(player => player.id !== socket.id);        
-  });
-
-  //This is for testing basic socket i/o connection
-  socket.on('test', data => {
-    let test = {
-      data: data
-    };
-    test.newData = 'New Data';
-
-    socket.emit('test', test);
+    if(leavingPlayer.boardId){
+      io.to(leavingPlayer.boardId).emit("board-reset");    
+    }
   });
 });
 
 function placePlayer(id) {
-  if (!session.length) {
+  if (!session.length || !session[0].id) {
     session[0] = {
       id: id,
       name: 'Player 1',
