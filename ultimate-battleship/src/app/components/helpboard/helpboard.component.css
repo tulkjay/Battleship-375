@@ -1,0 +1,38 @@
+.helpboard {
+  position: fixed;
+  bottom: 50px;
+  left: 5px;
+  width: 500px;
+  height: 70%;
+  padding: 50px 50px 50px 50px;
+  border: 3px solid lightcoral;
+  background-color: gray;
+  border-radius: 25px;
+  font-family: monospace;
+}
+
+.ship {
+  padding: 10px 20px;
+  margin: 25px;
+  border: 1px solid blue;
+  border-radius: 5px;
+  background-color: lightblue;
+  color: black;
+  transition: margin-left 0.3s;
+  font-size: 1.5em;
+}
+
+.ship:hover {
+  background-color: darkslategray;
+  color: lightblue;  
+  margin-left: 5px;  
+}
+
+.controls {
+  background-color: lightgray;
+  padding: 0px 10px;
+  margin-top: 90px;
+  border: 2px solid lightgray;
+  font-size: 2.5em;
+  border-radius: 10px;
+}

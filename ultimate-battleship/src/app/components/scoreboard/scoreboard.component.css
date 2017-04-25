@@ -2,21 +2,20 @@
   position: fixed;
   bottom: 50px;
   right: 15px;
-  width: 300px;
+  padding: 20px 10px 20px 10px;
   border: 3px solid lightcoral;
+  background-color: gray;
+  border-radius: 25px;
 }
 
-.ship {
-  padding: 10px 20px;
-  border: 1px solid blue;
-  border-radius: 5px;
-  margin: 5px;
-  background-color: lightblue;
-  color: black;
-  transition: margin-left 0.3s;
+.stat-box{
+  margin: 60px 20px 40px 20px;
+  padding: 35px;
 }
-.ship:hover {
-  background-color: darkslategray;
-  color: lightblue;  
-  margin-left: 10px;  
+
+.stat {
+  background-color: lightgray;
+  font-size: 3em;
+  font-family: monospace;
+  padding: 20px 30px;
 }

@@ -6,7 +6,7 @@
   "scripts": {
     "ng": "ng",
     "board": "node ./src/led-control/board.js",
-    "start": "start npm run server && ng serve",
+    "start": "ng serve",
     "dev-start": "start npm run dev-server && start npm run board && ng serve",
     "server": "node server.js",
     "dev-server": "nodemon server.js",

@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { GameService } from '../../services/game.service';
-import { ShipBuilder } from '../../helpers/ShipBuilder';
+import { SocketService } from '../../services/socket.service';
+import { ShipCatalog } from '../../helpers/ShipCatalog';
 
 @Component({
   selector:'scoreboard', 
@@ -12,45 +13,55 @@ export class ScoreboardComponent {
   state: any;  
   shotsFired: number;
   shotsHit: number;
-  shipsSunk: number;
-  shipsLost: number;
+  shotsMissed: number;
   hitMissRatio: number;
   listener: any;
-  shipBuilder: ShipBuilder;  
+  stateMessage: string;
+  selectedShip: string;
 
-  constructor(private gameService: GameService) {
-    this.state = {
-      shotsFired: 0,
-      shotsHit: 0,
-      shipsSunk: 0,
-      shipsLost: 0,
-      hitMissRatio: this.shotsFired > 0 ? this.shotsHit/this.shotsFired : 0
-    };
-
+  constructor(private gameService: GameService, private socketService : SocketService) {
     this.shotsFired = 0;
     this.shotsHit = 0;
-    this.shipsSunk = 0;
-    this.shipsLost = 0;
+    this.shotsMissed = 0;
     this.hitMissRatio = this.shotsFired > 0 ? this.shotsHit/this.shotsFired : 0;    
-    this.shipBuilder = new ShipBuilder();
 
-    this.gameService.StateStream.subscribe(state => this.setState(state));
+    this.gameService.GameStateStream.subscribe(state => this.setGameState(state));
+    this.gameService.StateStream.subscribe(state => this.updateStats(state));    
   }
 
-  setState(newState: Object) {
-    console.log("state change received: ", newState);    
-    
-    for(var item in newState){
-      this.state[item] = newState[item]
+  getStateBackgroundColor() {
+    switch(this.state) {
+      case 'setup':
+        this.stateMessage = "Place your ships";
+        return 'yellow'
+      case 'in-progress':
+        this.stateMessage = this.socketService.isPlayerTurn ? 'Fire when ready' : 'Waiting for return fire';
+        return this.socketService.isPlayerTurn ? 'green' : 'red'
+      case 'waiting':
+        this.stateMessage = "Waiting for opponent";
+        return 'red'
+      case 'done':
+       this.stateMessage = this.socketService.won ? 'You won!' : 'You lost'
+        return this.socketService.won ? 'green' : 'red'
+      default:
+        return 'lightgray'
     }
+  }  
+
+  setGameState(newState: Object) {
+    console.log("state change received: ", newState);    
+    this.state = newState;       
   }
-  
-  dragShip(event:any, shipName:string):void {
-    let data = this.shipBuilder.build(shipName);
-    event.dataTransfer.setData('ship', JSON.stringify(this.shipBuilder.build(shipName)));
-  }
-  
-  setShip(shipName:string) {
-    this.gameService.setSelectedShip(this.shipBuilder.build(shipName))
+
+  updateStats(success: Object) {
+    console.log("state: ", success[0])
+    this.shotsFired++;
+    
+    if(success[0]) {
+      this.shotsHit++;
+    } else {
+      this.shotsMissed++;
+    }
+    this.hitMissRatio = this.shotsHit/this.shotsFired;
   }
 }

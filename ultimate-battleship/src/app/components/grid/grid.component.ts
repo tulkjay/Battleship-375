@@ -58,14 +58,17 @@ export class GridComponent {
     this.constructBoard(); 
   }  
 
-  gameStateChanged(state: string) {
+  gameStateChanged(state: string) {    
     switch (state) {
       case 'setup':      
         this.setShip(this.shipsKey[0].ship);
         break;
       case 'in-progress':
-      this.selectedPosition = {x:0, y:0};
-      this.rows[0].squares[0].selected = true;
+        this.selectedPosition = {x:0, y:0};
+        this.rows[0].squares[0].selected = true;      
+      case 'done':
+        console.log("Time to lock everything down")
+        break;
       default:
         console.log("State handler not configured for state: ", state);
         break;
@@ -125,7 +128,7 @@ export class GridComponent {
       case 'PageDown':
         if(state === 'setup'){
           this.changeSelectedShip(1);
-        } 
+        }
         break;
       default:
         break;
@@ -269,7 +272,6 @@ export class GridComponent {
   }
 
   syncBoard(locations, color:string = 'blue', command:string = 'update-strip') {
-    console.log("Syncing", locations, color, command);
     this.socketService.emit(command, {locations: locations, color: color});        
   }
   
@@ -387,7 +389,7 @@ export class GridComponent {
     this.rows[startingRow].squares[startingColumn].text = this.selectedShip.name;
     
     updatedLocations.unshift({ y:startingColumn, x:startingRow });
-    this.syncBoard(updatedLocations, 'red', 'blink-strip')    
+    this.syncBoard(updatedLocations, 'red', 'update-strip')    
   }
 
   getSquareColor(square:Square) {    

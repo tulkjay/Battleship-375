@@ -8,9 +8,11 @@ import * as io from 'socket.io-client';
 export class SocketService{
   socket: SocketIOClient.Socket;
   isPlayerTurn: boolean;
+  won: boolean;
   
   constructor(private messageService: MessageService, private gameService: GameService){
     this.isPlayerTurn = false;
+    this.won = false;
     this.socket = io('http://localhost:3000');
 
     this.socket.on('connection-result', response => {        
@@ -18,15 +20,21 @@ export class SocketService{
       this.messageService.send(new Message(response.message));        
     });
 
-    this.socket.on('shot-received', response => { 
-      console.log("shot received")       
-      this.isPlayerTurn = true;
-      this.messageService.send(new Message(`Shot received at (${response.x},${response.y})`));        
+    this.socket.on('shot-received', hit => {       
+      this.isPlayerTurn = true;   
+      console.log("hit received", hit)         
+      if(hit) this.messageService.send(new Message("You've been hit!"));        
+      console.log("hit calcs", hit)
     });
 
     this.socket.on('game-state-changed', state => {
       this.gameService.setGameState(state);
     });
+
+    this.socket.on('shot-result', response => {
+      console.log("Shot results are in : ", response.success)
+      this.gameService.updateState(response.success);
+    })
 
     this.socket.on('game-ready', response => {
       console.log("response received: ", response)
@@ -35,9 +43,10 @@ export class SocketService{
     })
     
     this.socket.on('game-end', response => {
-      console.log("response received: ", response)
+      console.log("game end message received: ", response)
       this.gameService.setGameState(response.state);
-      this.messageService.send(new Message(response.message));
+      this.messageService.send(new Message(response.message, 10000));
+      this.won = response.won;
     })
   }
 

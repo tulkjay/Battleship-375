@@ -5,7 +5,7 @@ import { Message } from '../../models';
 @Component({
   selector:'message', 
   template: `
-    <div [ngClass]="this.message.active ? 'active' : 'hidden'">
+    <div class="message" [style.visibility]="this.message.active ? 'visible' : 'hidden'">
       {{message.message}}
     </div>
   `, 
@@ -30,6 +30,6 @@ export class MessageComponent implements OnInit{
 
     setTimeout(() => {
       this.message.active = false;
-    }, 4000);
+    }, text.timeout ? text.timeout : 4000);
   }
 }

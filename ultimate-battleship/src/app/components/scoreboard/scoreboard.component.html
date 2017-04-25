@@ -1,26 +1,9 @@
 <div class="scoreboard">
-    <div id="carrier" class="ship" draggable="true" (dragstart)="dragShip($event, 'carrier')" (click)="setShip('carrier')">
-        Carrier
-            <img src="../../../../resources/images/carrier.png" height="50%" width="80%">
-    </div>
-    <div class="ship" draggable="true" (dragstart)="dragShip($event, 'battleship')" (click)="setShip('battleship')">
-        Battleship
-        <img src="../../../../resources/images/battleship.png" height="50%" width="60%">
-    </div>
-    <div class="ship" draggable="true" (dragstart)="dragShip($event, 'cruiser')" (click)="setShip('cruiser')">
-        Cruiser
-         <img src="../../../../resources/images/cruiser.png" height="50%" width="40%">
-    </div>
-    <div class="ship" draggable="true" (dragstart)="dragShip($event, 'submarine')" (click)="setShip('submarine')">
-        Submarine
-          <img src="../../../../resources/images/sub.png" height="50%" width="40%">
-    </div>
-    <div class="ship" draggable="true" (dragstart)="dragShip($event, 'destroyer')" (click)="setShip('destroyer')">
-        Destroyer
-         <img src="../../../../resources/images/destroyer.png" height="50%" width="20%">
-    </div>
-    <div>Shots Fired: {{shotsFired}}</div>    
-    <div>Ships Sunk: {{shipsSunk}}</div>
-    <div>Ships Lost: {{shipsLost}}</div>
-    <div>Shots on Target: {{hitMissRatio | percent:'1.2-2'}}</div>
+    <div class="stat-box">
+        <div class="stat" [style.background]="getStateBackgroundColor()">{{stateMessage}}</div>
+        <div class="stat">Shots Fired: {{shotsFired}}</div>    
+        <div class="stat">Shots Hit: {{shotsHit}}</div>    
+        <div class="stat">Shots Missed: {{shotsMissed}}</div>    
+        <div class="stat">Shots on Target: {{hitMissRatio | percent:'1.2-2'}}</div>
+    </div>    
 </div>

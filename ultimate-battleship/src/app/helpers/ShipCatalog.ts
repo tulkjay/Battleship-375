@@ -1,9 +1,17 @@
 import { Ship } from '../models';
 
-export class ShipBuilder {
-  ship:Ship;
+export class ShipCatalog {
+  ships: Array<Ship>;
   
-  constructor(){}
+  constructor(){
+    this.ships = [
+      new Ship('carrier', 5),
+      new Ship('battleship', 4),
+      new Ship('cruiser', 3),
+      new Ship('submarine', 3),
+      new Ship('destroyer', 2),
+    ]
+  }
 
   build(shipName:string):Ship {
     switch (shipName) {
