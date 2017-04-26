@@ -6,7 +6,7 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 const pixel = require("./pixel.js");
 const port = 3000;
-const hostUrl = 'http://127.0.0.1:3000';
+const hostUrl = 'http://192.168.1.142:3000';
 
 const colors = ["red", "green", "blue"];
 

@@ -2,9 +2,20 @@ const five = require('johnny-five');
 const path = require('path');
 const express = require('express')
 const app = express();
-const server = require('http').Server(app);
-const io = require('socket.io')(server);
+
+var allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', 'example.com');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+
+    next();
+}
+app.use(allowCrossDomain);
+
 const port = 3000;
+const server = require('http').Server(app);
+server.listen(port, '192.168.1.142');
+const io = require('socket.io')(server);
 
 app.use(express.static(path.join(__dirname, 'server')));
 const colors = ["red", "green", "blue"];
@@ -183,7 +194,9 @@ function placePlayer(id) {
   };
 }
 
-io.listen(port, (err) => {
+
+
+io.listen(server, (err) => {
   if (err) {
     return console.log(`Error listening to port ${port}:`, err)
   }

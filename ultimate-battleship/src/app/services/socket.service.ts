@@ -13,7 +13,7 @@ export class SocketService{
   constructor(private messageService: MessageService, private gameService: GameService){
     this.isPlayerTurn = false;
     this.won = false;
-    this.socket = io('http://localhost:3000');
+    this.socket = io('http://192.168.1.142:3000');
 
     this.socket.on('connection-result', response => {        
       if(response.isTurn) this.setTurn(response.isTurn);        
