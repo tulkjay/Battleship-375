@@ -2,6 +2,10 @@ const five = require('johnny-five');
 const path = require('path');
 const express = require('express')
 const app = express();
+//const url = '192.168.1.142';
+const port = 8080;
+const url = '147.174.180.135';
+const hostUrl = `http:/${url}/:${port}`;
 
 var allowCrossDomain = function(req, res, next) {
     res.header('Access-Control-Allow-Origin', 'example.com');
@@ -12,9 +16,8 @@ var allowCrossDomain = function(req, res, next) {
 }
 app.use(allowCrossDomain);
 
-const port = 3000;
 const server = require('http').Server(app);
-server.listen(port, '192.168.1.142');
+server.listen(port, url);
 const io = require('socket.io')(server);
 
 app.use(express.static(path.join(__dirname, 'server')));

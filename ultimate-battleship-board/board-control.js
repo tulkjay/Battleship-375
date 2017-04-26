@@ -3,10 +3,13 @@ const path = require('path');
 const express = require('express')
 const app = express();
 const server = require('http').Server(app);
-const io = require('socket.io')(server);
+//const io = require('socket.io')(server);
+
 const pixel = require("./pixel.js");
 const port = 3000;
-const hostUrl = 'http://192.168.1.142:3000';
+//const url = '192.168.1.142';
+const url = '147.174.79.12';
+const hostUrl = `http:/${url}/${port}`;
 
 const colors = ["red", "green", "blue"];
 
@@ -18,8 +21,9 @@ const STATES = {
 }
 
 let board, stripHandler;
-let socket = require('socket.io-client')(hostUrl);
-
+let io = require('socket.io-client');
+let socket = io.connect('http://147.174.180.135:8080');
+console.log(socket.io.uri);
   socket.on('connect', function() {
     console.log("Socket connected!", socket.id);    
     registerBoard(socket.id);
@@ -76,7 +80,9 @@ let socket = require('socket.io-client')(hostUrl);
       console.log("Local socket connection result : ", data.message);
     });
   });
-
+socket.on('connect-error', function(err) {
+  console.log("error: ", err)
+})
   
 function registerBoard() {
   console.log("Adding board", socket.id);

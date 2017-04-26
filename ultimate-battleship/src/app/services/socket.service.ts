@@ -9,11 +9,15 @@ export class SocketService{
   socket: SocketIOClient.Socket;
   isPlayerTurn: boolean;
   won: boolean;
+  url: string;
+  port: number;
   
   constructor(private messageService: MessageService, private gameService: GameService){
     this.isPlayerTurn = false;
     this.won = false;
-    this.socket = io('http://192.168.1.142:3000');
+    this.url = '147.174.180.135';
+    this.port = 8080;
+    this.socket = io(`http://${this.url}:${this.port}`);
 
     this.socket.on('connection-result', response => {        
       if(response.isTurn) this.setTurn(response.isTurn);        
